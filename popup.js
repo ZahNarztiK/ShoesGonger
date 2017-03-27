@@ -9,25 +9,28 @@ var sg_info={
 };
 var room;
 
-function sg_save()
+function sg_save(t)
 {
-	sg_info.owrai=$('#sg_keyword').val();
-	sg_info.delayed=$('#sg_interval').val();
+	var kw=$('#sg_keyword').val().trim();
+	var de=(($('#sg_interval').val().length>0)?$('#sg_interval').val():0);
+	sg_info.owrai=kw;
+	sg_info.delayed=de;
 	sg_info.cookiesClear=$('#sg_clear').prop("checked");
-	sg_info.counter=0;
+	if(t)
+	{
+		$('#sg_keyword').val(kw);
+		$('#sg_interval').val(de);
+	}
+	room.postMessage("setInfo "+JSON.stringify(sg_info));
+}
+
+function sg_availKW()
+{
+	if($('#sg_keyword').val().trim().length>0) return true;
+	return false;
 }
 
 $(function(){
-
-	$('#sg_keyword').keyup(function(){
-		if ($(this).val().length > 0) $('#sg_button').attr("class","start");
-		else $('#sg_button').removeClass();
-	});
-
-	$('#sg_interval').keydown(function(n){
-		if ($.inArray(n.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 || (n.keyCode === 65 && (n.ctrlKey === true || n.metaKey === true)) || (n.keyCode >= 35 && n.keyCode <= 40)) return;
-		if ((n.shiftKey || (n.keyCode < 48 || n.keyCode > 57)) && (n.keyCode < 96 || n.keyCode > 105)) n.preventDefault();
-	});
 
 	room = chrome.extension.connect({ name: "GongChatRoom" });
 	room.onMessage.addListener(function(msg) {
@@ -35,6 +38,9 @@ $(function(){
 		var tail=msg.substr(cmd.length+1);
 		switch(cmd)
 		{
+			case "setCounter":
+				$('#sg_counter').html(sg_info.counter=tail);
+				break;
 			case "setInfo":
 				sg_info=JSON.parse(tail);
 				$('#sg_keyword').val(sg_info.owrai)
@@ -47,17 +53,36 @@ $(function(){
 			default: break;
 		}
 	});
+
 	$('#sg_button').click(function(){
-		if ($('#sg_keyword').val().length > 0) {
-			sg_save();
+		if(sg_info.run) room.postMessage("Toggle");
+		else if (sg_availKW()) {
+			sg_save(true);
 			room.postMessage("Set&Start "+JSON.stringify(sg_info));
 		}
 	});
+	
+	$('#sg_keyword').keyup(function(){
+		$('#sg_button').attr("class",sg_availKW()?"start":"");
+	});
+
+	$('#sg_interval').keydown(function(n){
+		if ($.inArray(n.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 || (n.keyCode === 65 && (n.ctrlKey === true || n.metaKey === true)) || (n.keyCode >= 35 && n.keyCode <= 40)) return;
+		if ((n.shiftKey || (n.keyCode < 48 || n.keyCode > 57)) && (n.keyCode < 96 || n.keyCode > 105)) n.preventDefault();
+	});
+
 	$('#sg_interval').focus(function(){
 		$(this).attr("placeHolder","");
 	});
+
+	$('.dis').focusout(function(){
+		sg_save(false);
+	});
+
 	$('#sg_interval').focusout(function(){
 		$(this).attr("placeHolder","0");
+		sg_save(false);
 	});
+
 	room.postMessage("getInfo");
 });

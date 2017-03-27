@@ -7,11 +7,17 @@ var sg_info={
 	cookiesClear:true,
 	delayed:0
 };
-var chat;
+var chat,chatOpen=false;
+
+function postCmd(cmd)
+{
+	if(chatOpen) chat.postMessage(cmd);
+}
 
 function inj()
 {
-	console.log("- Injected "+sg_info.tid+" : "+ ++sg_info.counter);
+	console.log("- Inject "+sg_info.tid+" : "+ ++sg_info.counter);
+	postCmd("setCounter "+sg_info.counter);
 	chrome.tabs.executeScript(sg_info.tid, {file: "jquery-1.7.2.js"},function(){
 		chrome.tabs.executeScript(sg_info.tid, {file: "shgg.js"}, function(){
 			chrome.tabs.executeScript(sg_info.tid, {code: "chkGong('"+sg_info.owrai+"');"});
@@ -35,7 +41,7 @@ function toggle()
 		})
 	}
 	chrome.browserAction.setIcon({path:"icon/icon16"+ (sg_info.run?"r":"")+".png"});
-	chat.postMessage("setInfo "+JSON.stringify(sg_info));
+	postCmd("setInfo "+JSON.stringify(sg_info));
 }
 
 chrome.tabs.onUpdated.addListener(function(tabId , info) {
@@ -53,32 +59,32 @@ chrome.runtime.onMessage.addListener(
 		else
 		{
 			//console.log("  SV: w8 " + sg_info.delayed+" ms");
-
-			chrome.browsingData.remove({
-					"since": 0
-				}, {
-					//"appcache": true,
-					//"cache": true,
-					"cookies": true,
-					//"downloads": true,
-					//"fileSystems": true,
-					//"formData": true,
-					//"history": true,
-					//"indexedDB": true,
-					//"localStorage": true,
-					//"pluginData": true,
-					//"passwords": true,
-					//"webSQL": true
-				}, function(){
-					chrome.tabs.reload(sg_info.tid);
-					console.log("  SV: Re!");
-				});
-
+			if(sg_info.cookiesClear)
+				chrome.browsingData.remove({
+						"since": 0
+					}, {
+						//"appcache": true,
+						//"cache": true,
+						"cookies": true,
+						//"downloads": true,
+						//"fileSystems": true,
+						//"formData": true,
+						//"history": true,
+						//"indexedDB": true,
+						//"localStorage": true,
+						//"pluginData": true,
+						//"passwords": true,
+						//"webSQL": true
+					}, function(){
+						chrome.tabs.reload(sg_info.tid);
+						console.log("  SV: Re!");
+					});
 		}
 	});
 
 chrome.extension.onConnect.addListener(function(room) {
 	chat=room;
+	chatOpen=true;
 	console.log("*- Connected to "+room.name+" -*");
 	room.onMessage.addListener(function(msg) {
 		var cmd=msg.split(" ",1)[0];
@@ -89,12 +95,22 @@ chrome.extension.onConnect.addListener(function(room) {
 			case "getInfo":
 				room.postMessage("setInfo "+JSON.stringify(sg_info));
 				break;
+			case "setInfo":
+				sg_info=JSON.parse(tail);
+				break;
 			case "Set&Start":
 				sg_info=JSON.parse(tail);
+				toggle();
+				break;
+			case "Toggle":
 				toggle();
 				break;
 			default: return;
 		}
 		console.log("* Do: "+cmd);
+	});
+	room.onDisconnect.addListener(function(msg) {
+		chatOpen=false;
+		console.log("*- Disconnected -*");
 	});
 })

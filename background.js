@@ -79,6 +79,7 @@ chrome.runtime.onMessage.addListener(
 						console.log("  SV: Re!");
 						chrome.tabs.reload(sg_info.tid);
 					});
+			else chrome.tabs.reload(sg_info.tid);
 		}
 	});
 

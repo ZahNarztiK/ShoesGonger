@@ -54,7 +54,7 @@ $(function(){
 		}
 	});
 
-	$('.dis').focusout(function(){
+	$('.dis').change(function(){
 		sg_save(false);
 	});
 
@@ -81,7 +81,6 @@ $(function(){
 
 	$('#sg_interval').focusout(function(){
 		$(this).attr("placeHolder","0");
-		sg_save(false);
 	});
 
 	room.postMessage("getInfo");

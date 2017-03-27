@@ -54,6 +54,10 @@ $(function(){
 		}
 	});
 
+	$('.dis').focusout(function(){
+		sg_save(false);
+	});
+
 	$('#sg_button').click(function(){
 		if(sg_info.run) room.postMessage("Toggle");
 		else if (sg_availKW()) {
@@ -73,10 +77,6 @@ $(function(){
 
 	$('#sg_interval').focus(function(){
 		$(this).attr("placeHolder","");
-	});
-
-	$('.dis').focusout(function(){
-		sg_save(false);
 	});
 
 	$('#sg_interval').focusout(function(){

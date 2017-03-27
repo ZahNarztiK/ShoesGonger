@@ -76,8 +76,8 @@ chrome.runtime.onMessage.addListener(
 						//"passwords": true,
 						//"webSQL": true
 					}, function(){
-						chrome.tabs.reload(sg_info.tid);
 						console.log("  SV: Re!");
+						chrome.tabs.reload(sg_info.tid);
 					});
 		}
 	});

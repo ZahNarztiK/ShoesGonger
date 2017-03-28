@@ -1,13 +1,39 @@
-var sg_info={
-	tid:0,
-	wid:0,
-	counter:0,
-	run:false,
-	owrai:"",
-	cookiesClear:true,
-	delayed:0
-};
+var sg_default={
+		owrai:"",
+		cookiesClear:true,
+		delayed:0
+	},
+	sg_info,
+	counter=0,
+	run=false;
+
 var room;
+
+function postCmd(cmd) { room.postMessage(cmd); }
+
+function sg_availKW() { return $('#sg_keyword').val().trim().length>0; }
+
+function sg_load()
+{
+	chrome.storage.sync.get(null,function(save){
+		sg_info=sg_default;
+		for(var k in save) if(k in sg_info) sg_info[k] = save[k];
+		postCmd("getCounter");
+		postCmd("getRun");
+	});
+}
+
+function sg_toggle()
+{
+	sg_toggleRun();
+	postCmd("Toggle");
+}
+
+function sg_toggleRun()
+{
+	run=!run;
+	sg_setForm();
+}
 
 function sg_save(t)
 {
@@ -21,17 +47,23 @@ function sg_save(t)
 		$('#sg_keyword').val(kw);
 		$('#sg_interval').val(de);
 	}
-	room.postMessage("setInfo "+JSON.stringify(sg_info));
+	chrome.storage.sync.set(sg_info);
 }
 
-function sg_availKW()
+function sg_setCounter(n) { $('#sg_counter').html(n); }
+
+function sg_setForm()
 {
-	if($('#sg_keyword').val().trim().length>0) return true;
-	return false;
+	$('#sg_keyword').val(sg_info.owrai)
+	$('#sg_interval').val(sg_info.delayed)
+	$('#sg_clear').prop("checked",sg_info.cookiesClear);
+	$('#sg_button').attr("class",run?"stop":"start");
+	$('#clear').attr("class",run?"disable":"");
+	$('.dis').prop("disabled", run);
+	sg_setCounter(counter);
 }
 
 $(function(){
-
 	room = chrome.extension.connect({ name: "GongChatRoom" });
 	room.onMessage.addListener(function(msg) {
 		var cmd=msg.split(" ",1)[0];
@@ -39,36 +71,28 @@ $(function(){
 		switch(cmd)
 		{
 			case "setCounter":
-				$('#sg_counter').html(sg_info.counter=tail);
+				sg_setCounter(counter=tail);
 				break;
-			case "setInfo":
-				sg_info=JSON.parse(tail);
-				$('#sg_keyword').val(sg_info.owrai)
-				$('#sg_interval').val(sg_info.delayed)
-				$('#sg_clear').prop("checked",sg_info.cookiesClear);
-				$('#sg_counter').html(sg_info.counter);
-				$('#sg_button').attr("class",sg_info.run?"stop":"start");
-				$('#clear').attr("class",sg_info.run?"disable":"");
-				$('.dis').prop("disabled", sg_info.run);
+			case "setRun":
+				run=(tail=="1");
+				sg_setForm();
+				break;
+			case "Stop":
+				sg_toggleRun();
 				break;
 			default: break;
 		}
 	});
 
-	$('.dis').change(function(){
-		sg_save(false);
+	$('#sg_clear').change(function(){
+		chrome.storage.sync.set({cookiesClear:(sg_info.cookiesClear=$('#sg_clear').prop("checked"))});
 	});
 
-	$('#sg_button').click(function(){
-		if(sg_info.run) room.postMessage("Toggle");
-		else if (sg_availKW()) {
-			sg_save(true);
-			room.postMessage("Set&Start "+JSON.stringify(sg_info));
-		}
-	});
+	$('#sg_button').click(function(){ if(run||sg_availKW()) sg_toggle(); });
 	
 	$('#sg_keyword').keyup(function(){
 		$('#sg_button').attr("class",sg_availKW()?"start":"");
+		chrome.storage.sync.set({owrai:(sg_info.owrai=$('#sg_keyword').val().trim())});
 	});
 
 	$('#sg_interval').keydown(function(n){
@@ -76,13 +100,13 @@ $(function(){
 		if ((n.shiftKey || (n.keyCode < 48 || n.keyCode > 57)) && (n.keyCode < 96 || n.keyCode > 105)) n.preventDefault();
 	});
 
-	$('#sg_interval').focus(function(){
-		$(this).attr("placeHolder","");
+	$('#sg_interval').keyup(function(){
+		chrome.storage.sync.set({delayed:(sg_info.delayed=(($('#sg_interval').val().length>0)?$('#sg_interval').val():0))});
 	});
 
-	$('#sg_interval').focusout(function(){
-		$(this).attr("placeHolder","0");
-	});
+	$('#sg_interval').focus(function(){ $(this).attr("placeHolder","");	});
 
-	room.postMessage("getInfo");
+	$('#sg_interval').focusout(function(){ $(this).attr("placeHolder","0");	});
+
+	sg_load();
 });

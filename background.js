@@ -1,56 +1,64 @@
-var sg_info={
-	tid:0,
-	wid:0,
-	counter:0,
-	run:false,
-	owrai:"kuy",
-	cookiesClear:true,
-	delayed:0
-};
+var sg_default={
+		owrai:"",
+		cookiesClear:true,
+		delayed:0
+	},
+	sg_info,
+	tid=0,
+	wid=0,
+	counter=0,
+	run=false;
+
 var chat,chatOpen=false;
 
-function postCmd(cmd)
-{
-	if(chatOpen) chat.postMessage(cmd);
-}
+function postCmd(cmd) { if(chatOpen) chat.postMessage(cmd); }
 
 function inj()
 {
-	console.log("- Inject "+sg_info.tid+" : "+ ++sg_info.counter);
-	postCmd("setCounter "+sg_info.counter);
-	chrome.tabs.executeScript(sg_info.tid, {file: "jquery-1.7.2.js"},function(){
-		chrome.tabs.executeScript(sg_info.tid, {file: "shgg.js"}, function(){
-			chrome.tabs.executeScript(sg_info.tid, {code: "chkGong('"+sg_info.owrai+"');"});
+	console.log("- Inject "+tid+" : "+ ++counter);
+	postCmd("setCounter "+counter);
+	chrome.tabs.executeScript(tid, {file: "jquery-1.7.2.js"},function(){
+		chrome.tabs.executeScript(tid, {file: "shgg.js"}, function(){
+			chrome.tabs.executeScript(tid, {code: "chkGong('"+sg_info.owrai+"');"});
 		});
+	});
+}
+
+function loadSettings()
+{
+	chrome.storage.sync.get(null,function(save){
+		console.log("-Load settings-\n"+JSON.stringify(save));
+		sg_info=sg_default;
+		for(var k in save) if(k in sg_info) sg_info[k] = save[k];
+		console.log("-sg_info-\n"+JSON.stringify(sg_info));
 	});
 }
 
 function toggle()
 {
-	console.log(sg_info.run?"Stop":"Start");
-	if(sg_info.run=!sg_info.run)
+	console.log(run?"Stop":"Start");
+	if(run=!run)
 	{
-		sg_info.counter=0;
+		loadSettings();
+		counter=0;
 		chrome.windows.getCurrent(function(win){
-			sg_info.wid=win.id;
+			wid=win.id;
 			console.log(win.id);
-			chrome.tabs.query({active:true,windowId:sg_info.wid},function(tab){
-					console.log(" TabID: ["+(sg_info.tid = tab[0].id)+"]");
-					inj();
+			chrome.tabs.query({active:true,windowId:wid},function(tab){
+				console.log(" TabID: ["+(tid = tab[0].id)+"]");
+				inj();
 			});
-		})
+		});
 	}
-	chrome.browserAction.setIcon({path:"icon/icon16"+ (sg_info.run?"r":"")+".png"});
+	chrome.browserAction.setIcon({path:"icon/icon16"+ (run?"r":"")+".png"});
 	postCmd("setInfo "+JSON.stringify(sg_info));
 }
 
-chrome.tabs.onUpdated.addListener(function(tabId , info) {
-	if (sg_info.run && info.status == "complete") inj();
-});
+chrome.tabs.onUpdated.addListener(function(tabId,info) { if(run && info.status=="complete") inj(); });
 
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
-		console.log("  Tab ["+sg_info.tid+"]: "+(request.daimai?"dai":"mai dai"));
+		console.log("  Tab ["+tid+"]: "+(request.daimai?"dai":"mai dai"));
 		if (request.daimai)
 		{
 			console.log("  SV: OK!!!");
@@ -77,9 +85,9 @@ chrome.runtime.onMessage.addListener(
 						//"webSQL": true
 					}, function(){
 						console.log("  SV: Re!");
-						chrome.tabs.reload(sg_info.tid);
+						chrome.tabs.reload(tid);
 					});
-			else chrome.tabs.reload(sg_info.tid);
+			else chrome.tabs.reload(tid);
 		}
 	});
 
@@ -93,15 +101,11 @@ chrome.extension.onConnect.addListener(function(room) {
 		console.log(cmd+"\n  ["+(tail?tail:"N/A")+"]");
 		switch(cmd)
 		{
-			case "getInfo":
-				room.postMessage("setInfo "+JSON.stringify(sg_info));
+			case "getCounter":
+				room.postMessage("setCounter "+counter);
 				break;
-			case "setInfo":
-				sg_info=JSON.parse(tail);
-				break;
-			case "Set&Start":
-				sg_info=JSON.parse(tail);
-				toggle();
+			case "getRun":
+				room.postMessage("setRun "+(run?1:0));
 				break;
 			case "Toggle":
 				toggle();
@@ -114,4 +118,4 @@ chrome.extension.onConnect.addListener(function(room) {
 		chatOpen=false;
 		console.log("*- Disconnected -*");
 	});
-})
+});

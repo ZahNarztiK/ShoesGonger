@@ -31,6 +31,6 @@
 	},
 
 	"permissions": [
-		"activeTab", "browsingData", "tabs", "webNavigation", "*://*/*"
+		"activeTab", "browsingData", "storage" , "tabs", "webNavigation", "*://*/*"
 	]
 }

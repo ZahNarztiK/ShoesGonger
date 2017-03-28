@@ -47,7 +47,8 @@ $(function(){
 				$('#sg_interval').val(sg_info.delayed)
 				$('#sg_clear').prop("checked",sg_info.cookiesClear);
 				$('#sg_counter').html(sg_info.counter);
-				if ($('#sg_keyword').val().length > 0) $('#sg_button').attr("class",sg_info.run?"stop":"start");
+				$('#sg_button').attr("class",sg_info.run?"stop":"start");
+				$('#clear').attr("class",sg_info.run?"disable":"");
 				$('.dis').prop("disabled", sg_info.run);
 				break;
 			default: break;

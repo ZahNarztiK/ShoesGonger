@@ -3,15 +3,14 @@ var sg_default={
 		cookiesClear:true,
 		delayed:0
 	},
-	sg_info,
-	tid=0,
+	sg_info;
+
+var	tid=0,
 	wid=0,
 	counter=0,
 	run=false;
 
-var chat,chatOpen=false;
-
-function postCmd(cmd) { if(chatOpen) chat.postMessage(cmd); }
+var chatRoom,chatOpen=false;
 
 function inj()
 {
@@ -34,6 +33,8 @@ function loadSettings()
 	});
 }
 
+function postCmd(cmd) { if(chatOpen) chatRoom.postMessage(cmd); }
+
 function toggle()
 {
 	console.log(run?"Stop":"Start");
@@ -53,46 +54,8 @@ function toggle()
 	chrome.browserAction.setIcon({path:"icon/icon16"+ (run?"r":"")+".png"});
 }
 
-chrome.tabs.onUpdated.addListener(function(tabId,info) { if(run && info.status=="complete") inj(); });
-
-chrome.runtime.onMessage.addListener(
-	function(request, sender, sendResponse) {
-		console.log("  Tab ["+tid+"]: "+(request.daimai?"dai":"mai dai"));
-		if (request.daimai)
-		{
-			console.log("  SV: OK!!!");
-			postCmd("Stop");
-			toggle();
-		}
-		else
-		{
-			//console.log("  SV: w8 " + sg_info.delayed+" ms");
-			if(sg_info.cookiesClear)
-				chrome.browsingData.remove({
-						"since": 0
-					}, {
-						//"appcache": true,
-						//"cache": true,
-						"cookies": true,
-						//"downloads": true,
-						//"fileSystems": true,
-						//"formData": true,
-						//"history": true,
-						//"indexedDB": true,
-						//"localStorage": true,
-						//"pluginData": true,
-						//"passwords": true,
-						//"webSQL": true
-					}, function(){
-						console.log("  SV: Re!");
-						chrome.tabs.reload(tid);
-					});
-			else chrome.tabs.reload(tid);
-		}
-	});
-
 chrome.extension.onConnect.addListener(function(room) {
-	chat=room;
+	chatRoom=room;
 	chatOpen=true;
 	console.log("*- Connected to "+room.name+" -*");
 	room.onMessage.addListener(function(msg) {
@@ -119,3 +82,40 @@ chrome.extension.onConnect.addListener(function(room) {
 		console.log("*- Disconnected -*");
 	});
 });
+
+chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
+	console.log("  Tab ["+tid+"]: "+(request.daimai?"dai":"mai dai"));
+	if (request.daimai)
+	{
+		console.log("  SV: OK!!!");
+		postCmd("Stop");
+		toggle();
+	}
+	else
+	{
+		//console.log("  SV: w8 " + sg_info.delayed+" ms");
+		if(sg_info.cookiesClear)
+			chrome.browsingData.remove({
+					"since": 0
+				}, {
+					//"appcache": true,
+					//"cache": true,
+					"cookies": true,
+					//"downloads": true,
+					//"fileSystems": true,
+					//"formData": true,
+					//"history": true,
+					//"indexedDB": true,
+					//"localStorage": true,
+					//"pluginData": true,
+					//"passwords": true,
+					//"webSQL": true
+				}, function(){
+					console.log("  SV: Re!");
+					chrome.tabs.reload(tid);
+				});
+		else chrome.tabs.reload(tid);
+	}
+});
+
+chrome.tabs.onUpdated.addListener(function(tabId,info) { if(run && info.status=="complete") inj(); });

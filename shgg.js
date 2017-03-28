@@ -1,4 +1,1 @@
-function chkGong(txt)
-{
-	chrome.runtime.sendMessage({daimai: ($("*:contains("+txt+")").length==0)});
-}
+function chkGong(txt){chrome.runtime.sendMessage({daimai:($("*:contains("+txt+")").length==0)});}

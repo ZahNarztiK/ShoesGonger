@@ -4,7 +4,8 @@ var sg_default={
 		delayed:0
 	},
 	sg_info,
-	counter=0,
+
+var counter=0,
 	run=false;
 
 var room;
@@ -23,18 +24,6 @@ function sg_load()
 	});
 }
 
-function sg_toggle()
-{
-	sg_toggleRun();
-	postCmd("Toggle");
-}
-
-function sg_toggleRun()
-{
-	run=!run;
-	sg_setForm();
-}
-
 function sg_setCounter(n) { $('#sg_counter').html(n); }
 
 function sg_setForm()
@@ -46,6 +35,18 @@ function sg_setForm()
 	$('#clear').attr("class",run?"disable":"");
 	$('.dis').prop("disabled", run);
 	sg_setCounter(counter);
+}
+
+function sg_toggle()
+{
+	sg_toggleRun();
+	postCmd("Toggle");
+}
+
+function sg_toggleRun()
+{
+	run=!run;
+	sg_setForm();
 }
 
 $(function(){
@@ -69,16 +70,15 @@ $(function(){
 		}
 	});
 
+	$('#sg_button').click(function(){ if(run||sg_availKW()) sg_toggle(); });
+
 	$('#sg_clear').change(function(){
 		chrome.storage.sync.set({cookiesClear:(sg_info.cookiesClear=$('#sg_clear').prop("checked"))});
 	});
 
-	$('#sg_button').click(function(){ if(run||sg_availKW()) sg_toggle(); });
-	
-	$('#sg_keyword').keyup(function(){
-		$('#sg_button').attr("class",sg_availKW()?"start":"");
-		chrome.storage.sync.set({owrai:(sg_info.owrai=$('#sg_keyword').val().trim())});
-	});
+	$('#sg_interval').focus(function(){ $(this).attr("placeHolder","");	});
+
+	$('#sg_interval').focusout(function(){ $(this).attr("placeHolder","0");	});
 
 	$('#sg_interval').keydown(function(n){
 		if ($.inArray(n.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 || (n.keyCode === 65 && (n.ctrlKey === true || n.metaKey === true)) || (n.keyCode >= 35 && n.keyCode <= 40)) return;
@@ -89,9 +89,10 @@ $(function(){
 		chrome.storage.sync.set({delayed:(sg_info.delayed=(($('#sg_interval').val().length>0)?Number($('#sg_interval').val()):0))});
 	});
 
-	$('#sg_interval').focus(function(){ $(this).attr("placeHolder","");	});
-
-	$('#sg_interval').focusout(function(){ $(this).attr("placeHolder","0");	});
+	$('#sg_keyword').keyup(function(){
+		$('#sg_button').attr("class",sg_availKW()?"start":"");
+		chrome.storage.sync.set({owrai:(sg_info.owrai=$('#sg_keyword').val().trim())});
+	});
 
 	sg_load();
 });

@@ -2,8 +2,8 @@
 	"manifest_version": 2,
 
 	"name": "Shoes Gonger",
-	"description": "Created by ZahNarztiK",
-	"version": "1.0",
+	"description": "Created by NC Production",
+	"version": "Test Alpha",
 	"icons": {
 		"16":"icon/icon16.png",
 		"32":"icon/icon32.png",

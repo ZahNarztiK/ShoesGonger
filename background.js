@@ -51,7 +51,6 @@ function toggle()
 		});
 	}
 	chrome.browserAction.setIcon({path:"icon/icon16"+ (run?"r":"")+".png"});
-	postCmd("setInfo "+JSON.stringify(sg_info));
 }
 
 chrome.tabs.onUpdated.addListener(function(tabId,info) { if(run && info.status=="complete") inj(); });
@@ -62,6 +61,7 @@ chrome.runtime.onMessage.addListener(
 		if (request.daimai)
 		{
 			console.log("  SV: OK!!!");
+			postCmd("Stop");
 			toggle();
 		}
 		else

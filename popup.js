@@ -3,7 +3,7 @@ var sg_default={
 		cookiesClear:true,
 		delayed:0
 	},
-	sg_info,
+	sg_info;
 
 var counter=0,
 	run=false;

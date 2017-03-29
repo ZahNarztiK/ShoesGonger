@@ -31,7 +31,7 @@ function sg_setForm()
 	$('#sg_keyword').val(sg_info.owrai);
 	$('#sg_interval').val(sg_info.delayed);
 	$('#sg_clear').prop("checked",sg_info.cookiesClear);
-	$('#sg_button').attr("class",run?"stop":"start");
+	$('#sg_button').attr("class",run?"stop":(sg_availKW()?"start":""));
 	$('#clear').attr("class",run?"disable":"");
 	$('.dis').prop("disabled", run);
 	sg_setCounter(counter);
@@ -39,8 +39,11 @@ function sg_setForm()
 
 function sg_toggle()
 {
-	sg_toggleRun();
-	postCmd("Toggle");
+	if(run||sg_availKW())
+	{
+		sg_toggleRun();
+		postCmd("Toggle");
+	}
 }
 
 function sg_toggleRun()
@@ -70,7 +73,7 @@ $(function(){
 		}
 	});
 
-	$('#sg_button').click(function(){ if(run||sg_availKW()) sg_toggle(); });
+	$('#sg_button').click(sg_toggle);
 
 	$('#sg_clear').change(function(){
 		chrome.storage.sync.set({cookiesClear:(sg_info.cookiesClear=$('#sg_clear').prop("checked"))});
@@ -80,18 +83,20 @@ $(function(){
 
 	$('#sg_interval').focusout(function(){ $(this).attr("placeHolder","0");	});
 
-	$('#sg_interval').keydown(function(n){
-		if ($.inArray(n.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 || (n.keyCode === 65 && (n.ctrlKey === true || n.metaKey === true)) || (n.keyCode >= 35 && n.keyCode <= 40)) return;
-		if ((n.shiftKey || (n.keyCode < 48 || n.keyCode > 57)) && (n.keyCode < 96 || n.keyCode > 105)) n.preventDefault();
+	$('#sg_interval').keydown(function(e){
+		if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 || (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) || (e.keyCode >= 35 && e.keyCode <= 40)) return;
+		if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) e.preventDefault();
 	});
 
-	$('#sg_interval').keyup(function(){
+	$('#sg_interval').keyup(function(e){
 		chrome.storage.sync.set({delayed:(sg_info.delayed=(($('#sg_interval').val().length>0)?Number($('#sg_interval').val()):0))});
+		if(e.keyCode==13) sg_toggle();
 	});
 
-	$('#sg_keyword').keyup(function(){
+	$('#sg_keyword').keyup(function(e){
 		$('#sg_button').attr("class",sg_availKW()?"start":"");
 		chrome.storage.sync.set({owrai:(sg_info.owrai=$('#sg_keyword').val().trim())});
+		if(e.keyCode==13) sg_toggle();
 	});
 
 	sg_load();

@@ -16,11 +16,7 @@ function inj()
 {
 	console.log("- Inject "+tid+" : "+ ++counter);
 	postCmd("setCounter "+counter);
-	chrome.tabs.executeScript(tid, {file: "jquery-1.7.2.js"},function(){
-		chrome.tabs.executeScript(tid, {file: "shgg.js"}, function(){
-			chrome.tabs.executeScript(tid, {code: "chkGong('"+sg_info.owrai+"');"});
-		});
-	});
+	chrome.tabs.executeScript(tid, {code: "chkGong('"+sg_info.owrai+"');"});
 }
 
 function loadSettings()
@@ -47,7 +43,7 @@ function toggle()
 			console.log(win.id);
 			chrome.tabs.query({active:true,windowId:wid},function(tab){
 				console.log(" TabID: ["+(tid = tab[0].id)+"]");
-				inj();
+				chrome.tabs.reload(tid);
 			});
 		});
 	}
@@ -84,38 +80,38 @@ chrome.extension.onConnect.addListener(function(room) {
 });
 
 chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
-	console.log("  Tab ["+tid+"]: "+(request.daimai?"dai":"mai dai"));
-	if (request.daimai)
+	if(request.ready && run) inj();
+	else if(request.daimai!=undefined)
 	{
-		console.log("  SV: OK!!!");
-		postCmd("Stop");
-		toggle();
-	}
-	else
-	{
-		//console.log("  SV: w8 " + sg_info.delayed+" ms");
-		if(sg_info.cookiesClear)
-			chrome.browsingData.remove({
-					"since": 0
-				}, {
-					//"appcache": true,
-					//"cache": true,
-					"cookies": true,
-					//"downloads": true,
-					//"fileSystems": true,
-					//"formData": true,
-					//"history": true,
-					//"indexedDB": true,
-					//"localStorage": true,
-					//"pluginData": true,
-					//"passwords": true,
-					//"webSQL": true
-				}, function(){
-					console.log("  SV: Re!");
-					chrome.tabs.reload(tid);
-				});
-		else chrome.tabs.reload(tid);
+		console.log("  Tab ["+tid+"]: "+(request.daimai?"dai":"mai dai"));
+		if (request.daimai)
+		{
+			console.log("  SV: OK!!!");
+			postCmd("Stop");
+			toggle();
+		}
+		else
+		{
+			//console.log("  SV: w8 " + sg_info.delayed+" ms");
+			console.log("  SV: Re!");
+			if(sg_info.cookiesClear)
+				chrome.browsingData.remove({
+						"since": 0
+					}, {
+						//"appcache": true,
+						//"cache": true,
+						"cookies": true,
+						//"downloads": true,
+						//"fileSystems": true,
+						//"formData": true,
+						//"history": true,
+						//"indexedDB": true,
+						//"localStorage": true,
+						//"pluginData": true,
+						//"passwords": true,
+						//"webSQL": true
+					}, function(){ chrome.tabs.reload(tid); });
+			else chrome.tabs.reload(tid);
+		}
 	}
 });
-
-chrome.tabs.onUpdated.addListener(function(tabId,info) { if(run && info.status=="complete") inj(); });

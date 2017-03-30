@@ -1,6 +1,6 @@
 var sg_default={
 		owrai:"",
-		cookiesClear:true,
+		dataClear:true,
 		delayed:0
 	},
 	sg_info;
@@ -14,20 +14,7 @@ var	tid=0,
 
 var chatRoom,chatOpen=false;
 
-var inj,reloadPage;
-
-function injDefault()
-{
-	console.log("- Inject "+tid+" : "+ ++counter);
-	postCmd("setCounter "+counter);
-	chrome.tabs.executeScript(tid,{code:"chkGong('"+sg_info.owrai+"');"});
-}
-
-function injTime()
-{
-	clearTimeout(timer);
-	injDefault();
-}
+var reloadPage;
 
 function loadSettings()
 {
@@ -44,7 +31,9 @@ function postCmd(cmd) { if(chatOpen) chatRoom.postMessage(cmd); }
 
 function reloadPageDefault()
 {
-	if(sg_info.cookiesClear)
+	console.log("- Inject "+tid+" : "+ ++counter);
+	postCmd("setCounter "+counter);
+	if(sg_info.dataClear)
 		chrome.browsingData.remove({
 				since: 0
 			}, {
@@ -66,6 +55,7 @@ function reloadPageDefault()
 
 function reloadPageTime()
 {
+	clearTimeout(timer);
 	reloadPageDefault();
 
 	console.log("  Timer: Wait " + sg_info.delayed+" ms");
@@ -88,17 +78,7 @@ function toggle()
 			console.log(" WinID: ["+(wid=win.id)+"]");
 			chrome.tabs.query({active:true,windowId:wid},function(tab){
 				console.log(" TabID: ["+(tid = tab[0].id)+"]");
-				if(sg_info.delayed>0)
-				{
-					inj=injTime;
-					reloadPage=reloadPageTime;
-				}
-				else
-				{
-					inj=injDefault;
-					reloadPage=reloadPageDefault;
-				}
-				reloadPage();
+				(reloadPage=(sg_info.delayed>0?reloadPageTime:reloadPageDefault))();
 			});
 		});
 	}
@@ -136,26 +116,22 @@ chrome.extension.onConnect.addListener(function(room){
 });
 
 chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
-	if(run)
+	if(run&&request.daimai!=undefined)
 	{
-		if(request.ready) inj();
-		else if(request.daimai!=undefined)
+		console.log("  Tab ["+tid+"]: "+(request.daimai?"dai":"mai dai"));
+		if (request.daimai)
 		{
-			console.log("  Tab ["+tid+"]: "+(request.daimai?"dai":"mai dai"));
-			if (request.daimai)
-			{
-				console.log("  SV: OK!!!");
-				postCmd("Stop");
-				alertSound.pause();
-				alertSound.currentTime=0;
-				alertSound.play();
-				toggle();
-			}
-			else
-			{
-				console.log("  SV: Re!");
-				reloadPage();
-			}
+			console.log("  SV: OK!!!");
+			postCmd("Stop");
+			alertSound.pause();
+			alertSound.currentTime=0;
+			alertSound.play();
+			toggle();
+		}
+		else
+		{
+			console.log("  SV: Re!");
+			reloadPage();
 		}
 	}
 });

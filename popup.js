@@ -1,6 +1,6 @@
 var sg_default={
 		owrai:"",
-		cookiesClear:true,
+		dataClear:true,
 		delayed:0
 	},
 	sg_info;
@@ -30,7 +30,7 @@ function sg_setForm()
 {
 	$('#sg_keyword').val(sg_info.owrai);
 	$('#sg_timeout').val(sg_info.delayed==0?"":sg_info.delayed);
-	$('#sg_clear').prop("checked",sg_info.cookiesClear);
+	$('#sg_clear').prop("checked",sg_info.dataClear);
 	$('#sg_button').attr("class",run?"stop":(sg_availKW()?"start":""));
 	$('#clear').attr("class",run?"disable":"");
 	$('.dis').prop("disabled", run);
@@ -76,7 +76,7 @@ $(function(){
 	$('#sg_button').click(sg_toggle);
 
 	$('#sg_clear').change(function(){
-		chrome.storage.sync.set({cookiesClear:(sg_info.cookiesClear=$('#sg_clear').prop("checked"))});
+		chrome.storage.sync.set({dataClear:(sg_info.dataClear=$('#sg_clear').prop("checked"))});
 	});
 
 	$('#sg_timeout').focus(function(){ $(this).attr("placeHolder","");	});

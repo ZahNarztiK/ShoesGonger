@@ -1,13 +1,28 @@
-var sg_default={
+var sg_defaultInfo={
 		owrai:"",
-		dataClear:true,
+		dataClear:false,
 		delayed:0
 	},
-	sg_info;
+	sg_defaultClearList={
+		appcache: false,
+		cache: false,
+		cookies: false,
+		downloads: false,
+		fileSystems: false,
+		formData: false,
+		history: false,
+		indexedDB: false,
+		localStorage: false,
+		pluginData: false,
+		passwords: false,
+		webSQL: false
+	},
+	sg_info,sg_clearList;
 
 var	tid=0,
 	wid=0,
 	counter=0,
+	reconfirm=0,
 	run=false,
 	timer,
 	alertSound=new Audio("sfx/alert.mp3");
@@ -20,11 +35,16 @@ function loadSettings()
 {
 	chrome.storage.sync.get(null,function(save){
 		console.log("-Load settings-\n"+JSON.stringify(save));
-		sg_info=sg_default;
+		sg_info=sg_defaultInfo;
 		for(var k in save) if(k in sg_info) sg_info[k]=save[k];
+		sg_clearList=sg_defaultClearList;
+		if(save.dataClearList!=undefined)
+			for(var k in save.dataClearList) if(k in sg_clearList) sg_clearList[k]=save.dataClearList[k];
 		console.log("-sg_info-\n"+JSON.stringify(sg_info));
+		console.log("-sg_clearList-\n"+JSON.stringify(sg_clearList));
 	});
 	counter=0;
+	reconfirm=0;
 }
 
 function postCmd(cmd) { if(chatOpen) chatRoom.postMessage(cmd); }
@@ -33,23 +53,9 @@ function reloadPageDefault()
 {
 	console.log("- Inject "+tid+" : "+ ++counter);
 	postCmd("setCounter "+counter);
-	if(sg_info.dataClear)
-		chrome.browsingData.remove({
-				since: 0
-			}, {
-				//appcache: true,
-				//cache: true,
-				cookies: true,
-				//downloads: true,
-				//fileSystems: true,
-				//formData: true,
-				//history: true,
-				//indexedDB: true,
-				//localStorage: true,
-				//pluginData: true,
-				//passwords: true,
-				//webSQL: true
-			}, function(){ chrome.tabs.reload(tid); });
+	reconfirm=0;
+	if(sg_info.dataClear&&sg_clearList!={})
+		chrome.browsingData.remove({since:0},sg_clearList,function(){ chrome.tabs.reload(tid); });
 	else chrome.tabs.reload(tid);
 }
 
@@ -58,7 +64,7 @@ function reloadPageTime()
 	clearTimeout(timer);
 	reloadPageDefault();
 
-	console.log("  Timer: Wait " + sg_info.delayed+" ms");
+	console.log("  Timer: Wait "+sg_info.delayed+" ms");
 	timer=setTimeout(function(){
 		if(run)
 		{
@@ -121,17 +127,33 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 		console.log("  Tab ["+tid+"]: "+(request.daimai?"dai":"mai dai"));
 		if (request.daimai)
 		{
+			clearTimeout(timer);
+			switch(reconfirm++)
+			{
+				case 0:
+					console.log("  SV: Immediately reconfirm");
+					chrome.tabs.executeScript(tid,{code:"sg_chk();"});
+					return;
+				case 1:
+					console.log("  SV: Wait for delayed reconfirm 5 s");
+					timer=setTimeout(function(){
+						chrome.tabs.executeScript(tid,{code:"sg_chk();"});
+					},5000);
+					return;
+				default: break;
+			}
 			console.log("  SV: OK!!!");
+			toggle();
 			postCmd("Stop");
 			alertSound.pause();
 			alertSound.currentTime=0;
 			alertSound.play();
-			toggle();
 		}
 		else
 		{
 			console.log("  SV: Re!");
 			reloadPage();
 		}
+
 	}
 });

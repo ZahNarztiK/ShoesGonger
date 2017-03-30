@@ -1,9 +1,23 @@
-var sg_default={
+var sg_defaultInfo={
 		owrai:"",
-		dataClear:true,
+		dataClear:false,
 		delayed:0
 	},
-	sg_info;
+	sg_defaultClearList={
+		appcache: false,
+		cache: false,
+		cookies: false,
+		downloads: false,
+		fileSystems: false,
+		formData: false,
+		history: false,
+		indexedDB: false,
+		localStorage: false,
+		pluginData: false,
+		passwords: false,
+		webSQL: false
+	},
+	sg_info,sg_clearList;
 
 var counter=0,
 	run=false;
@@ -17,8 +31,11 @@ function sg_availKW() { return $('#sg_keyword').val().trim().length>0; }
 function sg_load()
 {
 	chrome.storage.sync.get(null,function(save){
-		sg_info=sg_default;
-		for(var k in save) if(k in sg_info) sg_info[k] = save[k];
+		sg_info=sg_defaultInfo;
+		for(var k in save) if(k in sg_info) sg_info[k]=save[k];
+		sg_clearList=sg_defaultClearList;
+		if(save.dataClearList!=undefined)
+			for(var k in save.dataClearList) if(k in sg_clearList) sg_clearList[k]=save.dataClearList[k];
 		postCmd("getCounter");
 		postCmd("getRun");
 	});
@@ -28,9 +45,18 @@ function sg_setCounter(n) { $('#sg_counter').html(n); }
 
 function sg_setForm()
 {
+	$('#sg_clear').prop("checked",sg_info.dataClear);
+	$('.clearList').each(function(){
+		$(this).prop("checked",sg_clearList[$(this).name]);
+	});
+	sg_setCounter(counter);
+	sg_setFormAvail();
+}
+
+function sg_setFormAvail()
+{
 	$('#sg_keyword').val(sg_info.owrai);
 	$('#sg_timeout').val(sg_info.delayed==0?"":sg_info.delayed);
-	$('#sg_clear').prop("checked",sg_info.dataClear);
 	$('#sg_button').attr("class",run?"stop":(sg_availKW()?"start":""));
 	$('#clear').attr("class",run?"disable":"");
 	$('.dis').prop("disabled", run);
@@ -49,7 +75,7 @@ function sg_toggle()
 function sg_toggleRun()
 {
 	run=!run;
-	sg_setForm();
+	sg_setFormAvail();
 }
 
 $(function(){
@@ -72,11 +98,16 @@ $(function(){
 			default: break;
 		}
 	});
+	
+	$('.clearList').change(function(){
+		sg_clearList[$(this).name]=$(this).prop("checked");
+		chrome.storage.sync.set({dataClearList:sg_clearList});
+	});
 
 	$('#sg_button').click(sg_toggle);
 
 	$('#sg_clear').change(function(){
-		chrome.storage.sync.set({dataClear:(sg_info.dataClear=$('#sg_clear').prop("checked"))});
+		chrome.storage.sync.set({dataClear:(sg_info.dataClear=$(this).prop("checked"))});
 	});
 
 	$('#sg_timeout').focus(function(){ $(this).attr("placeHolder","");	});
@@ -84,18 +115,23 @@ $(function(){
 	$('#sg_timeout').focusout(function(){ $(this).attr("placeHolder","0");	});
 
 	$('#sg_timeout').keydown(function(e){
-		if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 || (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) || (e.keyCode >= 35 && e.keyCode <= 40)) return;
-		if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) e.preventDefault();
+		if	($.inArray(e.keyCode,[46,8,9,27,13,110,190])!==-1 ||
+			(e.keyCode===65&&(e.ctrlKey===true||e.metaKey===true)) ||
+			(e.keyCode>=35&&e.keyCode<=40))
+				return;
+		if((e.shiftKey||(e.keyCode<48||e.keyCode>57))&&(e.keyCode<96||e.keyCode>105)) e.preventDefault();
 	});
 
 	$('#sg_timeout').keyup(function(e){
-		chrome.storage.sync.set({delayed:(sg_info.delayed=((!isNaN($('#sg_timeout').val()) && $('#sg_timeout').val().length>0)?Number($('#sg_timeout').val()):0))});
+		chrome.storage.sync.set({
+			delayed:(sg_info.delayed=((!isNaN($(this).val()) && $(this).val().length>0)?Number($(this).val()):0))
+		});
 		if(e.keyCode==13) sg_toggle();
 	});
 
 	$('#sg_keyword').keyup(function(e){
 		$('#sg_button').attr("class",sg_availKW()?"start":"");
-		chrome.storage.sync.set({owrai:(sg_info.owrai=$('#sg_keyword').val().trim())});
+		chrome.storage.sync.set({owrai:(sg_info.owrai=$(this).val().trim())});
 		if(e.keyCode==13) sg_toggle();
 	});
 

@@ -8,12 +8,11 @@ var sg_default={
 var	tid=0,
 	wid=0,
 	counter=0,
-	run=false;
+	run=false,
+	timer,
+	alertSound=new Audio("sfx/alert.mp3");
 
-var chatRoom,chatOpen=false,timer;
-
-var alertSound=new Audio();
-alertSound.src="sfx/alert.mp3";
+var chatRoom,chatOpen=false;
 
 var inj,reloadPage;
 

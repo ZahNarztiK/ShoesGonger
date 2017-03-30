@@ -29,7 +29,7 @@ function sg_setCounter(n) { $('#sg_counter').html(n); }
 function sg_setForm()
 {
 	$('#sg_keyword').val(sg_info.owrai);
-	$('#sg_timeout').val(sg_info.delayed);
+	$('#sg_timeout').val(sg_info.delayed==0?"":sg_info.delayed);
 	$('#sg_clear').prop("checked",sg_info.cookiesClear);
 	$('#sg_button').attr("class",run?"stop":(sg_availKW()?"start":""));
 	$('#clear').attr("class",run?"disable":"");
@@ -89,7 +89,7 @@ $(function(){
 	});
 
 	$('#sg_timeout').keyup(function(e){
-		chrome.storage.sync.set({delayed:(sg_info.delayed=(($('#sg_timeout').val().length>0)?Number($('#sg_timeout').val()):0))});
+		chrome.storage.sync.set({delayed:(sg_info.delayed=((!isNaN($('#sg_timeout').val()) && $('#sg_timeout').val().length>0)?Number($('#sg_timeout').val()):0))});
 		if(e.keyCode==13) sg_toggle();
 	});
 

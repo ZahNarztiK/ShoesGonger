@@ -12,6 +12,9 @@ var	tid=0,
 
 var chatRoom,chatOpen=false,timer;
 
+var alertSound=new Audio();
+alertSound.src="sfx/alert.mp3";
+
 var inj,reloadPage;
 
 function injDefault()
@@ -35,6 +38,7 @@ function loadSettings()
 		for(var k in save) if(k in sg_info) sg_info[k]=save[k];
 		console.log("-sg_info-\n"+JSON.stringify(sg_info));
 	});
+	counter=0;
 }
 
 function postCmd(cmd) { if(chatOpen) chatRoom.postMessage(cmd); }
@@ -43,20 +47,20 @@ function reloadPageDefault()
 {
 	if(sg_info.cookiesClear)
 		chrome.browsingData.remove({
-				"since": 0
+				since: 0
 			}, {
-				//"appcache": true,
-				//"cache": true,
-				"cookies": true,
-				//"downloads": true,
-				//"fileSystems": true,
-				//"formData": true,
-				//"history": true,
-				//"indexedDB": true,
-				//"localStorage": true,
-				//"pluginData": true,
-				//"passwords": true,
-				//"webSQL": true
+				//appcache: true,
+				//cache: true,
+				cookies: true,
+				//downloads: true,
+				//fileSystems: true,
+				//formData: true,
+				//history: true,
+				//indexedDB: true,
+				//localStorage: true,
+				//pluginData: true,
+				//passwords: true,
+				//webSQL: true
 			}, function(){ chrome.tabs.reload(tid); });
 	else chrome.tabs.reload(tid);
 }
@@ -81,7 +85,6 @@ function toggle()
 	if(run=!run)
 	{
 		loadSettings();
-		counter=0;
 		chrome.windows.getCurrent(function(win){
 			console.log(" WinID: ["+(wid=win.id)+"]");
 			chrome.tabs.query({active:true,windowId:wid},function(tab){
@@ -144,6 +147,9 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 			{
 				console.log("  SV: OK!!!");
 				postCmd("Stop");
+				alertSound.pause();
+				alertSound.currentTime=0;
+				alertSound.play();
 				toggle();
 			}
 			else

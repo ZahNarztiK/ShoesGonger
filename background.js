@@ -67,8 +67,11 @@ function reloadPageTime()
 
 	console.log("  Timer: Wait " + sg_info.delayed+" ms");
 	timer=setTimeout(function(){
-		console.log("  Timer: Timed out, Re!");
-		if(run) reloadPage();
+		if(run)
+		{
+			console.log("  Timer: Timed out, Re!");
+			reloadPage();
+		}
 	},sg_info.delayed);
 }
 

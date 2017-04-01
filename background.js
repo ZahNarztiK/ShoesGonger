@@ -31,8 +31,7 @@ var chatRoom,chatOpen=false;
 
 var reloadPage;
 
-function loadSettings()
-{
+function loadSettings(){
 	chrome.storage.sync.get(null,function(save){
 		console.log("-Load settings-\n"+JSON.stringify(save));
 		sg_info=sg_defaultInfo;
@@ -49,8 +48,7 @@ function loadSettings()
 
 function postCmd(cmd) { if(chatOpen) chatRoom.postMessage(cmd); }
 
-function reloadPageDefault()
-{
+function reloadPageDefault(){
 	console.log("- Inject "+tid+" : "+ ++counter);
 	postCmd("setCounter "+counter);
 	reconfirm=0;
@@ -59,26 +57,21 @@ function reloadPageDefault()
 	else chrome.tabs.reload(tid);
 }
 
-function reloadPageTime()
-{
+function reloadPageTime(){
 	clearTimeout(timer);
 	reloadPageDefault();
-
 	console.log("  Timer: Wait "+sg_info.delayed+" ms");
 	timer=setTimeout(function(){
-		if(run)
-		{
+		if(run){
 			console.log("  Timer: Timed out, Re!");
 			reloadPage();
 		}
 	},sg_info.delayed);
 }
 
-function toggle()
-{
+function toggle(){
 	console.log(run?"Stop":"Start");
-	if(run=!run)
-	{
+	if(run=!run){
 		loadSettings();
 		chrome.windows.getCurrent(function(win){
 			console.log(" WinID: ["+(wid=win.id)+"]");
@@ -100,8 +93,7 @@ chrome.extension.onConnect.addListener(function(room){
 		var cmd=msg.split(" ",1)[0];
 		var tail=msg.substr(cmd.length+1);
 		console.log(cmd+"\n  ["+(tail?tail:"N/A")+"]");
-		switch(cmd)
-		{
+		switch(cmd){
 			case "getCounter":
 				room.postMessage("setCounter "+counter);
 				break;
@@ -122,14 +114,11 @@ chrome.extension.onConnect.addListener(function(room){
 });
 
 chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
-	if(run&&request.daimai!=undefined)
-	{
+	if(run&&request.daimai!=undefined){
+		clearTimeout(timer);
 		console.log("  Tab ["+tid+"]: "+(request.daimai?"dai":"mai dai"));
-		if (request.daimai)
-		{
-			clearTimeout(timer);
-			switch(reconfirm++)
-			{
+		if (request.daimai){
+			switch(reconfirm++){
 				case 0:
 					console.log("  SV: Immediately reconfirm");
 					chrome.tabs.executeScript(tid,{code:"sg_chk();"});
@@ -149,11 +138,9 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 			alertSound.currentTime=0;
 			alertSound.play();
 		}
-		else
-		{
+		else{
 			console.log("  SV: Re!");
 			reloadPage();
 		}
-
 	}
 });

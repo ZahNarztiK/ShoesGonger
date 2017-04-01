@@ -104,9 +104,11 @@ $(function(){
 	});
 	
 	$('.clearList').change(function(){
-		sg_clearList[$(this).name]=$(this).prop("checked");
+		sg_clearList[$(this).attr("name")]=$(this).prop("checked");
 		chrome.storage.sync.set({dataClearList:sg_clearList});
 	});
+
+	$('.toggleClearList').click(function(){ $('#clearList').toggle(); });
 
 	$('#sg_button').click(sg_toggle);
 
@@ -137,10 +139,6 @@ $(function(){
 		$('#sg_button').attr("class",sg_availKW()?"start":"");
 		chrome.storage.sync.set({owrai:(sg_info.owrai=$(this).val().trim())});
 		if(e.keyCode==13) sg_toggle();
-	});
-
-	$('#sg_toggleClearList').click(function(){
-		$('#clearList').toggle();
 	});
 
 	sg_load();

@@ -119,7 +119,7 @@ $(function(){
 
 	$('#sg_interval').keyup(function(e){
 		chrome.storage.sync.set({
-			delayed:(sg_info.delayed=((!isNaN($(this).val()) && $(this).val().length>0)?Number($(this).val()):0))
+			delayed:(sg_info.delayed=((!isNaN($(this).val())&&$(this).val().length>0)?Number($(this).val()):0))
 		});
 		if(e.keyCode==13) sg_toggle();
 	});
@@ -139,7 +139,7 @@ $(function(){
 		chrome.storage.sync.set({dataClearList:sg_clearList});
 	});
 
-	//document.addEventListener('contextmenu',e=>e.preventDefault());
+	//document.addEventListener("contextmenu",e=>e.preventDefault());
 
 	sg_load();
 });

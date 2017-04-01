@@ -144,6 +144,7 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 					return;
 				case 1:
 					console.log("  SV: Wait for delayed reconfirm "+reconfirmTime+" s");
+					chrome.browserAction.setIcon({path:"icon/icon16y.png"});
 					timerOut=setTimeout(function(){
 						console.log("  SV: Delayed reconfirm");
 						chrome.tabs.executeScript(tid,{code:"sg_chk();"});
@@ -159,6 +160,7 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 			alertSound.play();
 		}
 		else{
+			chrome.browserAction.setIcon({path:"icon/icon16r.png"});
 			if(timerIntervalDisabled){
 				console.log("  SV: Extra-cycled, Re!");
 				reloadPage();

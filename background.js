@@ -23,8 +23,11 @@ var	tid=0,
 	wid=0,
 	counter=0,
 	reconfirm=0,
+	reconfirmTime=5000,
+	timeoutDefault=10000,
 	run=false,
-	timer,
+	timerInterval,timerOut,
+	timerIntervalDisabled,timeout,timeBypass,
 	alertSound=new Audio("sfx/alert.mp3");
 
 var chatRoom,chatOpen=false;
@@ -39,6 +42,7 @@ function loadSettings(){
 		sg_clearList=sg_defaultClearList;
 		if(save.dataClearList!=undefined)
 			for(var k in save.dataClearList) if(k in sg_clearList) sg_clearList[k]=save.dataClearList[k];
+		timeout=sg_info.delayed+timeoutDefault;
 		console.log("-sg_info-\n"+JSON.stringify(sg_info));
 		console.log("-sg_clearList-\n"+JSON.stringify(sg_clearList));
 	});
@@ -52,19 +56,32 @@ function reloadPageDefault(){
 	console.log("- Inject "+tid+" : "+ ++counter);
 	postCmd("setCounter "+counter);
 	reconfirm=0;
+	timeBypass=false;
 	if(sg_info.dataClear&&sg_clearList!={})
 		chrome.browsingData.remove({since:0},sg_clearList,function(){ chrome.tabs.reload(tid); });
 	else chrome.tabs.reload(tid);
-}
-
-function reloadPageTime(){
-	clearTimeout(timer);
-	reloadPageDefault();
-	console.log("  Timer: Wait "+sg_info.delayed+" ms");
-	timer=setTimeout(function(){
+	console.log("  Timer: Wait timeout "+timeout+" ms");
+	timerOut=setTimeout(function(){
 		if(run){
 			console.log("  Timer: Timed out, Re!");
 			reloadPage();
+		}
+	},timeout);
+}
+
+function reloadPageTime(){
+	clearTimeout(timerInterval);
+	reloadPageDefault();
+	timeBypass=false;
+	timerIntervalDisabled=false;
+	console.log("  Timer: Wait cycle "+sg_info.delayed+" ms");
+	timerInterval=setTimeout(function(){
+		if(run){
+			if(timeBypass){
+				console.log("  Timer: Cycled, Re!");
+				reloadPage();
+			}
+			else timerIntervalDisabled=true;
 		}
 	},sg_info.delayed);
 }
@@ -77,11 +94,12 @@ function toggle(){
 			console.log(" WinID: ["+(wid=win.id)+"]");
 			chrome.tabs.query({active:true,windowId:wid},function(tab){
 				console.log(" TabID: ["+(tid = tab[0].id)+"]");
+				timerIntervalDisabled=true;
 				(reloadPage=(sg_info.delayed>0?reloadPageTime:reloadPageDefault))();
 			});
 		});
 	}
-	else clearTimeout(timer);
+	else clearTimeout(timerOut);
 	chrome.browserAction.setIcon({path:"icon/icon16"+ (run?"r":"")+".png"});
 }
 
@@ -115,8 +133,8 @@ chrome.extension.onConnect.addListener(function(room){
 
 chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 	if(run&&request.daimai!=undefined){
-		clearTimeout(timer);
 		console.log("  Tab ["+tid+"]: "+(request.daimai?"dai":"mai dai"));
+		clearTimeout(timerOut);
 		if (request.daimai){
 			switch(reconfirm++){
 				case 0:
@@ -124,10 +142,10 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 					chrome.tabs.executeScript(tid,{code:"sg_chk();"});
 					return;
 				case 1:
-					console.log("  SV: Wait for delayed reconfirm 5 s");
-					timer=setTimeout(function(){
+					console.log("  SV: Wait for delayed reconfirm "+reconfirmTime+" s");
+					timerOut=setTimeout(function(){
 						chrome.tabs.executeScript(tid,{code:"sg_chk();"});
-					},5000);
+					},reconfirmTime);
 					return;
 				default: break;
 			}
@@ -139,8 +157,11 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 			alertSound.play();
 		}
 		else{
-			console.log("  SV: Re!");
-			reloadPage();
+			if(timerIntervalDisabled){
+				console.log("  SV: Extra-cycled, Re!");
+				reloadPage();
+			}
+			else timeBypass=true;
 		}
 	}
 });

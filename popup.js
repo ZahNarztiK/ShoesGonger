@@ -53,7 +53,7 @@ function sg_setForm(){
 
 function sg_setFormAvail(){
 	$('#sg_keyword').val(sg_info.owrai);
-	$('#sg_timeout').val(sg_info.delayed==0?"":sg_info.delayed);
+	$('#sg_interval').val(sg_info.delayed==0?"":sg_info.delayed);
 	$('#sg_button').attr("class",run?"stop":(sg_availKW()?"start":""));
 	$('#clear').attr("class",run?"disable":"");
 	$('.dis').prop("disabled", run);
@@ -103,11 +103,11 @@ $(function(){
 		chrome.storage.sync.set({dataClear:(sg_info.dataClear=$(this).prop("checked"))});
 	});
 
-	$('#sg_timeout').focus(function(){ $(this).attr("placeHolder",""); });
+	$('#sg_interval').focus(function(){ $(this).attr("placeHolder",""); });
 
-	$('#sg_timeout').focusout(function(){ $(this).attr("placeHolder","0"); });
+	$('#sg_interval').focusout(function(){ $(this).attr("placeHolder","0"); });
 
-	$('#sg_timeout').keydown(function(e){
+	$('#sg_interval').keydown(function(e){
 		if	($.inArray(e.keyCode,[46,8,9,27,13,110,190])!==-1 ||
 			(e.keyCode===65&&(e.ctrlKey===true||e.metaKey===true)) ||
 			(e.keyCode>=35&&e.keyCode<=40))
@@ -115,7 +115,7 @@ $(function(){
 		if((e.shiftKey||(e.keyCode<48||e.keyCode>57))&&(e.keyCode<96||e.keyCode>105)) e.preventDefault();
 	});
 
-	$('#sg_timeout').keyup(function(e){
+	$('#sg_interval').keyup(function(e){
 		chrome.storage.sync.set({
 			delayed:(sg_info.delayed=((!isNaN($(this).val()) && $(this).val().length>0)?Number($(this).val()):0))
 		});

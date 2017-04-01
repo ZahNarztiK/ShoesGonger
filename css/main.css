@@ -64,18 +64,18 @@ section#header .version {
 section#keyword input {
 	width: 180px;
 }
-section#timeout input {
+section#interval input {
 	text-align: center;
 	width: 52px;
 }
-section#keyword .label, section#timeout .label {
+section#keyword .label, section#interval .label {
 	height: 31px;
 	line-height: 34px;
 }
 section#keyword .label {
 	margin-right: 7px;
 }
-section#timeout .label {
+section#interval .label {
 	margin: 0 7px;
 }
 section#button {
@@ -134,7 +134,7 @@ section#counter {
 .inputborder input[type=text]:focus, .inputborder input[type=password]:focus, .inputborder input[type=number]:focus {
 	outline: none;
 }
-section#timeout .inputborder input {
+section#interval .inputborder input {
 	text-align: center;
 }
 

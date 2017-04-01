@@ -20,7 +20,7 @@ section {
 	position: relative;
 }
 section:after {
-	content: " ";
+	content: '';
 	clear: both;
 	display: block;
 }
@@ -85,7 +85,7 @@ section#clear {
 	line-height: 16px;
 }
 section#clear .sub-section {
-	width: 130px;
+	width: 108px;
 	position: relative;
 }
 section#clear .label {
@@ -161,7 +161,7 @@ section#interval .inputborder input {
 	box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,.4);
 }
 .checkbox label:after {
-	content: "";
+	content: '';
 	width: 7px;
 	height: 3px;
 	position: absolute;
@@ -175,24 +175,44 @@ section#interval .inputborder input {
 	transform: rotate(-45deg);
 }
 .checkbox label:before {
-	content: "CLEAR ALL DATA";
 	position: absolute;
-	text-align: right !important;
-	width: 109px;
 	color: #000;
 	font-size: 0.9em;
 	height: 16px;
 	line-height: 16px;
 	display: inline-block;
 }
+.checkbox label[for=sg_dataClear]:before {
+	content: 'CLEAR DATA';
+	text-align: right;
+	width: 86px;
+}
+.checkbox label.chkOption:before {
+	padding-left: 20px;
+	text-align: left;
+	text-transform: uppercase;
+	width: auto !important;
+}
+.checkbox label[for=sg_appcache]:before { content: 'appcache'; }
+.checkbox label[for=sg_cache]:before { content: 'cache'; }
+.checkbox label[for=sg_cookies]:before { content: 'cookies'; }
+.checkbox label[for=sg_downloads]:before { content: 'downloads'; }
+.checkbox label[for=sg_fileSystems]:before { content: 'fileSystems'; }
+.checkbox label[for=sg_formData]:before { content: 'formData'; }
+.checkbox label[for=sg_history]:before { content: 'history'; }
+.checkbox label[for=sg_indexedDB]:before { content: 'indexedDB'; }
+.checkbox label[for=sg_localStorage]:before { content: 'localStorage'; }
+.checkbox label[for=sg_pluginData]:before { content: 'pluginData'; }
+.checkbox label[for=sg_passwords]:before { content: 'passwords'; }
+.checkbox label[for=sg_webSQL]:before { content: 'webSQL'; }
 
-.checkbox input[type=checkbox] {
+.checkbox input {
 	margin: 0;
 	width: 16px;
 	height: 16px;
 	visibility: hidden;
 }
-.checkbox input[type=checkbox]:checked + label:after {
+.checkbox input:checked + label:after {
 	opacity: 1;
 }
 .checkbox input[disabled] + label {
@@ -217,7 +237,7 @@ div#sg_button {
 	background-color: #ddd;
 }
 div#sg_button:after {
-	content: "START";
+	content: 'START';
 	color: #bbb;
 	font-size: 1.2em;
 	left: 0;
@@ -246,7 +266,7 @@ div#sg_button.start {
 	background-color: #26a69a;
 }
 div#sg_button.start:after {
-	content: "START";
+	content: 'START';
 }
 div#sg_button.start:hover {
 	background-color: #2bbbad;
@@ -255,36 +275,46 @@ div#sg_button.stop {
 	background-color: #db686c;
 }
 div#sg_button.stop:after {
-	content: "STOP";
+	content: 'STOP';
 }
 div#sg_button.stop:hover {
 	background-color: #f17176;
 }
 
 section#clearList {
-	padding: 0 !important;
+	padding: 0;
 	top: 34px;
 	right: 0;
-	bottom: 0;
+	bottom: 35px;
 	left: 0;
 	position: absolute;
 	display: none;
 	background-color: #fff;
-	z-index: 9999;
+	z-index: 9998;
 }
-
+section#clearList .sub-section {
+	padding: 15px 30px;
+	position: relative;
+	display: block;
+}
+section#clearList .sub-section .checkbox {
+	margin: 4px 0;
+	width: 100%;
+	display: block;
+}
 #sg_toggleClearList {
-	width: 14px;
-	height: 14px;
-	cursor: pointer;
+	width: 16px;
+	height: 16px;
 }
 #sg_toggleClearList .option {
 	padding: 0;
+	margin: 1px;
 	width: 14px;
 	height: 14px;
 	transition: all 0.2s;
-	color: #666;
+	color: #888;
 	position: relative;
+	cursor: pointer;
 }
 #sg_toggleClearList .option:hover {
 	color: #000;
@@ -298,7 +328,6 @@ section#clearList {
 	transform: translate(-50%,-50%);
 }
 section#clear #sg_toggleClearList .option {
-	margin: 1px;
 	border: 2px dotted;
 	border-radius: 50%;
 }
@@ -308,8 +337,14 @@ section#clear #sg_toggleClearList .option:before {
 	box-shadow: 0 0 0 3px;
 	border-radius: 50%;
 }
+section#clearList #sg_toggleClearList {
+	top: 20px;
+	right: 20px;
+	position: absolute;
+	z-index: 9999;
+}
 section#clearList #sg_toggleClearList .option {
-
+	position: absolute;
 	transform: rotate(45deg);
 }
 section#clearList #sg_toggleClearList .option:before, section#clearList #sg_toggleClearList .option:after {
@@ -322,4 +357,13 @@ section#clearList #sg_toggleClearList .option:before {
 section#clearList #sg_toggleClearList .option:after {
 	width: 2px;
 	height: 18px;
+}
+
+.left {
+	width: 50%;
+	float: left;
+}
+.right {
+	width: 50%;
+	float: right;
 }

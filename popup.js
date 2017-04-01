@@ -44,8 +44,6 @@ function sg_load(){
 function sg_setCounter(n) { $('#sg_counter').html(n); }
 
 function sg_setForm(){
-	//$('#sg_inverse').prop("checked",sg_info.inverse);
-	//$('#sg_dataClear').prop("checked",sg_info.dataClear);
 	$('.chkBox').each(function(){
 		$(this).prop("checked",sg_info[$(this).attr("name")]);
 	});
@@ -102,19 +100,10 @@ $(function(){
 		sg_info[$(this).attr("name")]=(obj[$(this).attr("name")]=$(this).prop("checked"));		
 		chrome.storage.sync.set(obj);
 	});
-	
-	$('.clearList').change(function(){
-		sg_clearList[$(this).attr("name")]=$(this).prop("checked");
-		chrome.storage.sync.set({dataClearList:sg_clearList});
-	});
 
 	$('.toggleClearList').click(function(){ $('#clearList').toggle(); });
 
 	$('#sg_button').click(sg_toggle);
-
-	/*$('#sg_dataClear').change(function(){
-		chrome.storage.sync.set({dataClear:(sg_info.dataClear=$(this).prop("checked"))});
-	});*/
 
 	$('#sg_interval').focus(function(){ $(this).attr("placeHolder",""); });
 
@@ -139,6 +128,15 @@ $(function(){
 		$('#sg_button').attr("class",sg_availKW()?"start":"");
 		chrome.storage.sync.set({owrai:(sg_info.owrai=$(this).val().trim())});
 		if(e.keyCode==13) sg_toggle();
+	});
+
+	$('#sg_selectAll').change(function(){ $('.clearList').prop("checked","true"); });
+
+	$('#sg_selectNone').change(function(){ $('.clearList').prop("checked","false");	});
+
+	$('#sg_toggleClearList').change(function(){
+		sg_clearList[$(this).attr("name")]=$(this).prop("checked");
+		chrome.storage.sync.set({dataClearList:sg_clearList});
 	});
 
 	sg_load();

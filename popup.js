@@ -139,5 +139,7 @@ $(function(){
 		chrome.storage.sync.set({dataClearList:sg_clearList});
 	});
 
+	//document.addEventListener('contextmenu',e=>e.preventDefault());
+
 	sg_load();
 });

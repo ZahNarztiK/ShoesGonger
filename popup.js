@@ -1,7 +1,8 @@
 var sg_defaultInfo={
 		owrai:"",
 		dataClear:false,
-		delayed:0
+		delayed:0,
+		inverse:false
 	},
 	sg_defaultClearList={
 		appcache: false,
@@ -43,9 +44,13 @@ function sg_load(){
 function sg_setCounter(n) { $('#sg_counter').html(n); }
 
 function sg_setForm(){
-	$('#sg_clear').prop("checked",sg_info.dataClear);
+	//$('#sg_inverse').prop("checked",sg_info.inverse);
+	//$('#sg_dataClear').prop("checked",sg_info.dataClear);
+	$('.chkBox').each(function(){
+		$(this).prop("checked",sg_info[$(this).attr("name")]);
+	});
 	$('.clearList').each(function(){
-		$(this).prop("checked",sg_clearList[$(this).name]);
+		$(this).prop("checked",sg_clearList[$(this).attr("name")]);
 	});
 	sg_setCounter(counter);
 	sg_setFormAvail();
@@ -91,6 +96,12 @@ $(function(){
 			default: break;
 		}
 	});
+
+	$('.chkBox').change(function(){
+		var obj={};
+		sg_info[$(this).attr("name")]=(obj[$(this).attr("name")]=$(this).prop("checked"));		
+		chrome.storage.sync.set(obj);
+	});
 	
 	$('.clearList').change(function(){
 		sg_clearList[$(this).name]=$(this).prop("checked");
@@ -99,9 +110,9 @@ $(function(){
 
 	$('#sg_button').click(sg_toggle);
 
-	$('#sg_clear').change(function(){
+	/*$('#sg_dataClear').change(function(){
 		chrome.storage.sync.set({dataClear:(sg_info.dataClear=$(this).prop("checked"))});
-	});
+	});*/
 
 	$('#sg_interval').focus(function(){ $(this).attr("placeHolder",""); });
 
@@ -126,6 +137,10 @@ $(function(){
 		$('#sg_button').attr("class",sg_availKW()?"start":"");
 		chrome.storage.sync.set({owrai:(sg_info.owrai=$(this).val().trim())});
 		if(e.keyCode==13) sg_toggle();
+	});
+
+	$('#sg_toggleClearList').click(function(){
+		$('#clearList').toggle();
 	});
 
 	sg_load();

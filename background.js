@@ -166,7 +166,7 @@ chrome.extension.onConnect.addListener(function(room){
 });
 
 chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
-	if(run&&request.daimai!=undefined){
+	if(run&&sender.tab.id==tid&&request.daimai!=undefined){
 		console.log("  Tab ["+tid+"]: "+((request.daimai!=sg_info.inverse)?"dai":"mai dai"));
 		clearTimeout(timerOut);
 		if (request.daimai!=sg_info.inverse){
@@ -208,8 +208,7 @@ chrome.tabs.onActivated.addListener(function(info){ if(info.tabId==tid) stopAler
 chrome.tabs.onRemoved.addListener(function(tabId,info){
 	if(tabId==tid){
 		stopAlert();
-		if(run)
-		{
+		if(run){
 			toggle();
 			postCmd("Stop");
 		}

@@ -122,7 +122,12 @@ $(function(){
 		chrome.storage.sync.set(obj);
 	});
 
-	$('.toggleClearList').click(function(){ $('#clearList').toggle(); });
+	$('.clearList').change(function(){
+		sg_clearList[$(this).attr("name")]=$(this).prop("checked");
+		chrome.storage.sync.set({dataClearList:sg_clearList});
+	});
+
+	$('.toggleClearList').click(function(){  });
 
 	$('#modal-no').click(sg_confirm_close);
 
@@ -159,10 +164,7 @@ $(function(){
 
 	$('#sg_selectNone').change(function(){ $('.clearList').prop("checked","false");	});
 
-	$('#sg_toggleClearList').change(function(){
-		sg_clearList[$(this).attr("name")]=$(this).prop("checked");
-		chrome.storage.sync.set({dataClearList:sg_clearList});
-	});
+	$('#sg_toggleClearList').click(function(){ $('#clearList').toggle(); });
 
 	//document.addEventListener("contextmenu",e=>e.preventDefault());
 

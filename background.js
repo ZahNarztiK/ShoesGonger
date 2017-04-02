@@ -20,8 +20,8 @@ var sg_defaultInfo={
 	},
 	sg_info,sg_clearList;
 
-var	tid=0,
-	wid=0,
+var	tid=null,
+	wid=null,
 	counter=0,
 	reconfirm=0,
 	reconfirmTime=5000,
@@ -38,6 +38,18 @@ soundPreAlert.loop=true;
 var chatRoom,chatOpen=false;
 
 var reloadPage;
+
+function delayedReconfirm()
+{
+	reconfirm++;
+	console.log("  SV: Wait for delayed reconfirm "+reconfirmTime+" s");
+	chrome.browserAction.setIcon({path:"icon/icon16y.png"});
+	soundPreAlert.play();
+	timerOut=setTimeout(function(){
+		console.log("  SV: Delayed reconfirm");
+		chrome.tabs.executeScript(tid,{code:"sg_chk();"});
+	},reconfirmTime);
+}
 
 function loadSettings(){
 	stopAlert();
@@ -164,13 +176,10 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 					chrome.tabs.executeScript(tid,{code:"sg_chk();"});
 					return;
 				case 1:
-					console.log("  SV: Wait for delayed reconfirm "+reconfirmTime+" s");
-					chrome.browserAction.setIcon({path:"icon/icon16y.png"});
-					soundPreAlert.play();
-					timerOut=setTimeout(function(){
-						console.log("  SV: Delayed reconfirm");
-						chrome.tabs.executeScript(tid,{code:"sg_chk();"});
-					},reconfirmTime);
+					chrome.tabs.get(tid,function(tab){
+						if(tab.status=="complete") delayedReconfirm();
+						else console.log("  SV: Wait for complete loading");
+					});
 					return;
 				default: break;
 			}
@@ -194,10 +203,13 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 	else if(request.yuudwoi!=undefined) stopAlert();
 });
 
-chrome.tabs.onActivated.addListener(function(info){
-	if(info.windowId==wid&&info.tabId==tid) stopAlert();
-});
+chrome.tabs.onActivated.addListener(function(info){ if(info.tabId==tid) stopAlert(); });
 
-chrome.tabs.onRemoved.addListener(function(tabId,info){
-	if(info.windowId==wid&&tabId==tid) stopAlert();
+chrome.tabs.onRemoved.addListener(function(tabId,info){	if(tabId==tid) stopAlert(); });
+
+chrome.tabs.onUpdated.addListener(function(tabId,info,tab){
+	if(run&&tabId==tid&&reconfirm==2){
+		console.log("  Tab ["+tid+"]: Load Complete");
+		delayedReconfirm();
+	}
 });

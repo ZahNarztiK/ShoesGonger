@@ -20,13 +20,14 @@ var sg_defaultInfo={
 	},
 	sg_info,sg_clearList;
 
-var	tid=null,
-	wid=null,
+var	tid,
+	wid,
 	counter=0,
 	reconfirm=0,
 	reconfirmTime=5000,
 	timeoutDefault=10000,
 	run=false,
+	runURL,
 	timerInterval,timerOut,
 	timerIntervalDisabled,timeout,timeBypass,
 	soundAlert=new Audio("sfx/alert.mp3"),
@@ -38,6 +39,16 @@ soundPreAlert.loop=true;
 var chatRoom,chatOpen=false;
 
 var reloadPage;
+
+function chkTid(tabId,str){
+	if(tabId==tid){
+		stopAlert();
+		if(run){
+			if(str!="") console.log(str);
+			stopRun();
+		}
+	}
+}
 
 function delayedReconfirm()
 {
@@ -65,7 +76,6 @@ function loadSettings(){
 		console.log("-sg_clearList-\n"+JSON.stringify(sg_clearList));
 	});
 	counter=0;
-	reconfirm=0;
 }
 
 function postCmd(cmd) { if(chatOpen) chatRoom.postMessage(cmd); }
@@ -104,6 +114,11 @@ function reloadPageTime(){
 	},sg_info.delayed);
 }
 
+function stopRun(){
+	toggle();
+	postCmd("Stop");
+}
+
 function stopAlert()
 {
 	soundAlert.pause();
@@ -125,6 +140,7 @@ function toggle(){
 			console.log(" WinID: ["+(wid=win.id)+"]");
 			chrome.tabs.query({active:true,windowId:wid},function(tab){
 				console.log(" TabID: ["+(tid = tab[0].id)+"]");
+				runURL=tab[0].url;
 				timerIntervalDisabled=true;
 				(reloadPage=(sg_info.delayed>0?reloadPageTime:reloadPageDefault))();
 			});
@@ -166,58 +182,64 @@ chrome.extension.onConnect.addListener(function(room){
 });
 
 chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
-	if(run&&sender.tab.id==tid&&request.daimai!=undefined){
-		console.log("  Tab ["+tid+"]: "+((request.daimai!=sg_info.inverse)?"dai":"mai dai"));
-		clearTimeout(timerOut);
-		if (request.daimai!=sg_info.inverse){
-			switch(reconfirm++){
-				case 0:
-					console.log("  SV: Immediately reconfirm");
-					chrome.tabs.executeScript(tid,{code:"sg_chk();"});
-					return;
-				case 1:
-					chrome.tabs.get(tid,function(tab){
-						if(tab.status=="complete") delayedReconfirm();
-						else console.log("  SV: Wait for complete loading");
-					});
-					return;
-				default: break;
+	if(sender.tab.id==tid){
+		if(run&&request.daimai!=undefined){
+			console.log("  Tab["+tid+"]: "+((request.daimai!=sg_info.inverse)?"dai":"mai dai"));
+			clearTimeout(timerOut);
+			if (request.daimai!=sg_info.inverse){
+				switch(reconfirm++){
+					case 0:
+						console.log("  SV: Immediately reconfirm");
+						chrome.tabs.executeScript(tid,{code:"sg_chk();"});
+						return;
+					case 1:
+						chrome.tabs.get(tid,function(tab){
+							if(tab.status=="complete") delayedReconfirm();
+							else console.log("  SV: Wait for complete loading");
+						});
+						return;
+					default: break;
+				}
+				console.log("  SV: OK!!!");
+				stopRun();
+				soundAlert.play();
+				chrome.browserAction.setIcon({path:"icon/icon16g.png"});
 			}
-			console.log("  SV: OK!!!");
-			toggle();
-			postCmd("Stop");
-			stopPreAlert();
-			soundAlert.play();
-			chrome.browserAction.setIcon({path:"icon/icon16g.png"});
-		}
-		else{
-			stopPreAlert();
-			chrome.browserAction.setIcon({path:"icon/icon16r.png"});
-			if(timerIntervalDisabled){
-				console.log("  SV: Extra-cycled, Re!");
-				reloadPage();
+			else{
+				stopPreAlert();
+				chrome.browserAction.setIcon({path:"icon/icon16r.png"});
+				if(timerIntervalDisabled){
+					console.log("  SV: Extra-cycled, Re!");
+					reloadPage();
+				}
+				else timeBypass=true;
 			}
-			else timeBypass=true;
 		}
+		else if(request.yuudwoi!=undefined) stopAlert();
 	}
-	else if(request.yuudwoi!=undefined) stopAlert();
 });
 
-chrome.tabs.onActivated.addListener(function(info){ if(info.tabId==tid) stopAlert(); });
+chrome.tabs.onActivated.addListener(function(info){
+	chkTid(info.tabId,"");
+});
 
 chrome.tabs.onRemoved.addListener(function(tabId,info){
-	if(tabId==tid){
-		stopAlert();
-		if(run){
-			toggle();
-			postCmd("Stop");
-		}
-	}
+	chkTid(tabId,"  SV: Tab["+tid+"] was closed, Stop!");
+});
+
+chrome.tabs.onReplaced.addListener(function(addedTabId,removedTabId){
+	chkTid(removedTabId,"  SV: Tab["+removedTabId+"] was replaced w/ Tab["+addedTabId+"], Stop!");
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId,info,tab){
-	if(run&&tabId==tid&&reconfirm==2){
-		console.log("  Tab ["+tid+"]: Load Complete");
-		delayedReconfirm();
+	if(run&&tabId==tid){
+		if(tab.url!=runURL){
+			console.log("  SV: URL was changed, Stop!");
+			stopRun();
+		}
+		else if(reconfirm==2){
+			console.log("  Tab ["+tid+"]: Load Complete");
+			delayedReconfirm();
+		}	
 	}
 });

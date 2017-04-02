@@ -205,7 +205,16 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 
 chrome.tabs.onActivated.addListener(function(info){ if(info.tabId==tid) stopAlert(); });
 
-chrome.tabs.onRemoved.addListener(function(tabId,info){	if(tabId==tid) stopAlert(); });
+chrome.tabs.onRemoved.addListener(function(tabId,info){
+	if(tabId==tid){
+		stopAlert();
+		if(run)
+		{
+			toggle();
+			postCmd("Stop");
+		}
+	}
+});
 
 chrome.tabs.onUpdated.addListener(function(tabId,info,tab){
 	if(run&&tabId==tid&&reconfirm==2){

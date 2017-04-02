@@ -29,13 +29,18 @@ var	tid=0,
 	run=false,
 	timerInterval,timerOut,
 	timerIntervalDisabled,timeout,timeBypass,
-	alertSound=new Audio("sfx/alert.mp3");
+	soundAlert=new Audio("sfx/alert.mp3"),
+	soundPreAlert=new Audio("sfx/prealert.mp3");
+
+soundAlert.loop=true;
+soundPreAlert.loop=true;
 
 var chatRoom,chatOpen=false;
 
 var reloadPage;
 
 function loadSettings(){
+	stopAlert();
 	chrome.storage.sync.get(null,function(save){
 		console.log("-Load settings-\n"+JSON.stringify(save));
 		sg_info=sg_defaultInfo;
@@ -87,6 +92,19 @@ function reloadPageTime(){
 	},sg_info.delayed);
 }
 
+function stopAlert()
+{
+	soundAlert.pause();
+	soundAlert.currentTime=0;
+	chrome.browserAction.setIcon({path:"icon/icon16.png"});
+}
+
+function stopPreAlert()
+{
+	soundPreAlert.pause();
+	soundPreAlert.currentTime=0;
+}
+
 function toggle(){
 	console.log(run?"Stop":"Start");
 	if(run=!run){
@@ -100,7 +118,10 @@ function toggle(){
 			});
 		});
 	}
-	else clearTimeout(timerOut);
+	else{
+		clearTimeout(timerOut);
+		stopPreAlert();
+	}
 	chrome.browserAction.setIcon({path:"icon/icon16"+ (run?"r":"")+".png"});
 }
 
@@ -145,6 +166,7 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 				case 1:
 					console.log("  SV: Wait for delayed reconfirm "+reconfirmTime+" s");
 					chrome.browserAction.setIcon({path:"icon/icon16y.png"});
+					soundPreAlert.play();
 					timerOut=setTimeout(function(){
 						console.log("  SV: Delayed reconfirm");
 						chrome.tabs.executeScript(tid,{code:"sg_chk();"});
@@ -155,11 +177,12 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 			console.log("  SV: OK!!!");
 			toggle();
 			postCmd("Stop");
-			alertSound.pause();
-			alertSound.currentTime=0;
-			alertSound.play();
+			stopPreAlert();
+			soundAlert.play();
+			chrome.browserAction.setIcon({path:"icon/icon16g.png"});
 		}
 		else{
+			stopPreAlert();
 			chrome.browserAction.setIcon({path:"icon/icon16r.png"});
 			if(timerIntervalDisabled){
 				console.log("  SV: Extra-cycled, Re!");
@@ -168,4 +191,13 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 			else timeBypass=true;
 		}
 	}
+	else if(request.yuudwoi!=undefined) stopAlert();
+});
+
+chrome.tabs.onActivated.addListener(function(info){
+	if(info.windowId==wid&&info.tabId==tid) stopAlert();
+});
+
+chrome.tabs.onRemoved.addListener(function(tabId,info){
+	if(info.windowId==wid&&tabId==tid) stopAlert();
 });

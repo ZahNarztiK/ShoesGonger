@@ -64,29 +64,19 @@ function sg_setFormAvail(){
 	sg_setCounter(counter);
 }
 
-function sg_toggle(){
-	if(run||sg_availKW()){
-		sg_toggleRun();
-	}
-}
+function sg_toggle(){ if(run||sg_availKW()) sg_toggleRun(); }
 
 function sg_toggleRun(){
 	if(!run) {
-		if(parseInt($('#sg_interval').val())<1000) {
-			sg_confirm();
-		}
-		else { sg_start(); }
+		if(sg_info.delayed<1000) sg_confirm();
+		else sg_start();
 	}
-	else { sg_stop(); }
+	else sg_stop();
 }
 
-function sg_confirm() {
-	$('#confirm-modal').removeClass("hidden");
-}
+function sg_confirm() { $('#confirm-modal').removeClass("hidden"); }
 
-function sg_confirm_close() {
-	$('#confirm-modal').addClass("hidden");
-}
+function sg_confirm_close() { $('#confirm-modal').addClass("hidden"); }
 
 function sg_confirm_yes() {
 	sg_start();
@@ -119,7 +109,8 @@ $(function(){
 				sg_setForm();
 				break;
 			case "Stop":
-				sg_toggleRun();
+				run=false;
+				sg_setFormAvail();
 				break;
 			default: break;
 		}
@@ -132,6 +123,10 @@ $(function(){
 	});
 
 	$('.toggleClearList').click(function(){ $('#clearList').toggle(); });
+
+	$('#modal-no').click(sg_confirm_close);
+
+	$('#modal-yes').click(sg_confirm_yes);
 
 	$('#sg_button').click(sg_toggle);
 
@@ -169,9 +164,6 @@ $(function(){
 		chrome.storage.sync.set({dataClearList:sg_clearList});
 	});
 
-	$('#modal-no').click(sg_confirm_close);
-
-	$('#modal-yes').click(sg_confirm_yes);
 	//document.addEventListener("contextmenu",e=>e.preventDefault());
 
 	sg_load();

@@ -127,8 +127,6 @@ $(function(){
 		chrome.storage.sync.set({dataClearList:sg_clearList});
 	});
 
-	$('.toggleClearList').click(function(){  });
-
 	$('#modal-no').click(sg_confirm_close);
 
 	$('#modal-yes').click(sg_confirm_yes);

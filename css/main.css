@@ -6,7 +6,7 @@ html, body {
 	font-family: 'Arial', sans-serif;
 	background: #fff;
 }
-#container {
+.container {
 	width: 350px;
 	height: 250px;
 	display: block;
@@ -290,7 +290,7 @@ section#clearList {
 	position: absolute;
 	display: none;
 	background-color: #fff;
-	z-index: 9998;
+	z-index: 998;
 }
 section#clearList .sub-section {
 	padding: 15px 30px;
@@ -341,7 +341,7 @@ section#clearList #sg_toggleClearList {
 	top: 20px;
 	right: 20px;
 	position: absolute;
-	z-index: 9999;
+	z-index: 999;
 }
 section#clearList #sg_toggleClearList .option {
 	position: absolute;
@@ -366,4 +366,91 @@ section#clearList #sg_toggleClearList .option:after {
 .right {
 	width: 50%;
 	float: right;
+}
+.text-small {
+	font-size: 0.8em;
+}
+.modal {
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	padding: 20px;
+	position: absolute;
+	background-color: rgba(0,0,0,0.7);
+	z-index: 9999;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.modal-content {
+	display: block;
+	text-align: center;
+	background-color: white;
+	color: black;
+	padding: 20px 35px;
+	box-shadow: inset 0 1px 1px white, 0 1px 3px rgba(0, 0, 0, 0.5);
+	border-radius: 10px;
+}
+.modal-title {
+	margin-bottom: 8px;
+}
+.modal-body {
+	font-size: 1.1em;
+}
+.modal-footer {
+	margin-top: 8px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.sg-button {
+	margin: 5px;
+	letter-spacing: 1px;
+	width: 100px;
+	height: 40px;
+	line-height: 40px;
+	display: block;
+	position: relative;
+	border-radius: 2px;
+	background-color: #ddd;
+	border-radius: 2px;
+	transition: all 0.2s ease-out;
+	cursor: pointer;
+}
+.sg-button:after {
+	left: 0;
+	top: 0;
+	width: 100px;
+	height: 40px;
+	line-height: 40px;
+	position: absolute;
+	display: block;
+}
+.sg-button.yes, .sg-button.no {
+	box-shadow: inset 0 1px 1px white, 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.sg-button.yes {
+	background-color: #26a69a;
+}
+.sg-button.yes:after {
+	color: white;
+	content: 'START';
+}
+.sg-button.yes:hover {
+	background-color: #2bbbad;
+}
+.sg-button.no {
+	background-color: white;
+}
+.sg-button.no:after {
+	color: gray;
+	content: 'CANCEL';
+}
+.sg-button.no:hover {
+	background-color: ghostwhite;
+}
+.hidden {
+	display: none;
 }

@@ -21,7 +21,8 @@ var sg_defaultInfo={
 	sg_info,sg_clearList;
 
 var counter=0,
-	run=false;
+	run=false,
+	confirming=false;
 
 var room;
 
@@ -66,12 +67,41 @@ function sg_setFormAvail(){
 function sg_toggle(){
 	if(run||sg_availKW()){
 		sg_toggleRun();
-		postCmd("Toggle");
 	}
 }
 
 function sg_toggleRun(){
-	run=!run;
+	if(!run) {
+		if(parseInt($('#sg_interval').val())<1000) {
+			sg_confirm();
+		}
+		else { sg_start(); }
+	}
+	else { sg_stop(); }
+}
+
+function sg_confirm() {
+	$('#confirm-modal').removeClass("hidden");
+}
+
+function sg_confirm_close() {
+	$('#confirm-modal').addClass("hidden");
+}
+
+function sg_confirm_yes() {
+	sg_start();
+	sg_confirm_close();
+}
+
+function sg_start() {
+	postCmd("Toggle");
+	run=true;
+	sg_setFormAvail();
+}
+
+function sg_stop() {
+	postCmd("Toggle");
+	run=false;
 	sg_setFormAvail();
 }
 
@@ -139,6 +169,9 @@ $(function(){
 		chrome.storage.sync.set({dataClearList:sg_clearList});
 	});
 
+	$('#modal-no').click(sg_confirm_close);
+
+	$('#modal-yes').click(sg_confirm_yes);
 	//document.addEventListener("contextmenu",e=>e.preventDefault());
 
 	sg_load();

@@ -2,7 +2,8 @@ var sg_defaultInfo={
 		owrai:"",
 		dataClear:false,
 		delayed:0,
-		inverse:false
+		inverse:false,
+		redirect:false
 	},
 	sg_defaultClearList={
 		appcache: false,

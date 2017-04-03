@@ -2,7 +2,8 @@ var sg_defaultInfo={
 		owrai:"",
 		dataClear:false,
 		delayed:0,
-		inverse:false
+		inverse:false,
+		redirect:false
 	},
 	sg_defaultClearList={
 		appcache: false,
@@ -31,6 +32,7 @@ var	tid,
 	timerInterval,timerOut,
 	timerIntervalDisabled,timeout,timeBypass,
 	soundAlert=new Audio("sfx/alert.mp3"),
+	soundError=new Audio("sfx/error.mp3"),
 	soundPreAlert=new Audio("sfx/prealert.mp3");
 
 soundAlert.loop=true;
@@ -40,13 +42,21 @@ var chatRoom,chatOpen=false;
 
 var reloadPage;
 
-function chkTid(tabId,str){
-	if(tabId==tid){
-		stopAlert();
+function chkError(tabId,str)
+{
+	chkTid(tabId,str,function(){
 		if(run){
 			if(str!="") console.log(str);
 			stopRun();
+			soundError.play();
 		}
+	});
+}
+
+function chkTid(tabId,str,func){
+	if(tabId==tid){
+		stopAlert();
+		func();
 	}
 }
 
@@ -64,6 +74,7 @@ function delayedReconfirm()
 
 function loadSettings(){
 	stopAlert();
+	stopSound(soundError);
 	chrome.storage.sync.get(null,function(save){
 		console.log("-Load settings-\n"+JSON.stringify(save));
 		sg_info=sg_defaultInfo;
@@ -114,22 +125,21 @@ function reloadPageTime(){
 	},sg_info.delayed);
 }
 
-function stopRun(){
-	toggle();
-	postCmd("Stop");
-}
-
 function stopAlert()
 {
-	soundAlert.pause();
-	soundAlert.currentTime=0;
+	stopSound(soundAlert);
 	chrome.browserAction.setIcon({path:"icon/icon16.png"});
 }
 
-function stopPreAlert()
+function stopSound(sound)
 {
-	soundPreAlert.pause();
-	soundPreAlert.currentTime=0;
+	sound.pause();
+	sound.currentTime=0;
+}
+
+function stopRun(){
+	toggle();
+	postCmd("Stop");
 }
 
 function toggle(){
@@ -148,7 +158,7 @@ function toggle(){
 	}
 	else{
 		clearTimeout(timerOut);
-		stopPreAlert();
+		stopSound(soundPreAlert);;
 	}
 	chrome.browserAction.setIcon({path:"icon/icon16"+ (run?"r":"")+".png"});
 }
@@ -206,7 +216,7 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 				chrome.browserAction.setIcon({path:"icon/icon16g.png"});
 			}
 			else{
-				stopPreAlert();
+				stopSound(soundPreAlert);;
 				chrome.browserAction.setIcon({path:"icon/icon16r.png"});
 				if(timerIntervalDisabled){
 					console.log("  SV: Extra-cycled, Re!");
@@ -224,18 +234,19 @@ chrome.tabs.onActivated.addListener(function(info){
 });
 
 chrome.tabs.onRemoved.addListener(function(tabId,info){
-	chkTid(tabId,"  SV: Tab["+tid+"] was closed, Stop!");
+	chkError(tabId,"  SV: Tab["+tid+"] was closed, Stop!");
 });
 
 chrome.tabs.onReplaced.addListener(function(addedTabId,removedTabId){
-	chkTid(removedTabId,"  SV: Tab["+removedTabId+"] was replaced w/ Tab["+addedTabId+"], Stop!");
+	chkError(removedTabId,"  SV: Tab["+removedTabId+"] was replaced w/ Tab["+addedTabId+"], Stop!");
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId,info,tab){
 	if(run&&tabId==tid){
-		if(tab.url!=runURL){
+		if(!sg_info.redirect&&tab.url!=runURL){
 			console.log("  SV: URL was changed, Stop!");
 			stopRun();
+			soundError.play();
 		}
 		else if(reconfirm==2){
 			console.log("  Tab ["+tid+"]: Load Complete");

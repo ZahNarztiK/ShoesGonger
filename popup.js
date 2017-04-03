@@ -37,13 +37,21 @@ function sg_load(){
 		for(var k in save) if(k in sg_info) sg_info[k]=save[k];
 		sg_clearList=sg_defaultClearList;
 		if(save.dataClearList!=undefined)
-			for(var k in save.dataClearList) if(k in sg_clearList) sg_clearList[k]=save.dataClearList[k];
+			for(var k in save.dataClearList)
+				if(k in sg_clearList) sg_clearList[k]=save.dataClearList[k];
 		postCmd("getCounter");
 		postCmd("getRun");
 	});
 }
 
 function sg_setCounter(n) { $('#sg_counter').html(n); }
+
+function sg_setClearList(status){
+	sg_clearList=sg_defaultClearList;
+	for(var k in sg_clearList)
+		sg_clearList[k]=status;
+	chrome.storage.sync.set({dataClearList:sg_clearList});
+}
 
 function sg_setForm(){
 	$('.chkBox').each(function(){
@@ -159,9 +167,15 @@ $(function(){
 		if(e.keyCode==13) sg_toggle();
 	});
 
-	$('#sg_selectAll').change(function(){ $('.clearList').prop("checked","true"); });
+	$('#sg_selectAll').click(function(){
+		$('.clearList').each(function(){ $(this).prop("checked",true); });
+		sg_setClearList(true);
+	});
 
-	$('#sg_selectNone').change(function(){ $('.clearList').prop("checked","false");	});
+	$('#sg_selectNone').click(function(){
+		$('.clearList').each(function(){ $(this).prop("checked",false); });
+		sg_setClearList(false);
+	});
 
 	$('#sg_toggleClearList').click(function(){ $('#clearList').toggle(); });
 

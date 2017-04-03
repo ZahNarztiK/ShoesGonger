@@ -187,6 +187,16 @@ section#interval .inputborder input {
 	text-align: right;
 	width: 86px;
 }
+.checkbox label[for=sg_inverse]:before {
+	content: 'REFRESH WHEN NO KEYWORD FOUND';
+	text-align: right;
+	width: 226px;
+}
+.checkbox label[for=sg_redirect]:before {
+	content: 'WORK ON URL CHANGED';
+	text-align: right;
+	width: 154px;
+}
 .checkbox label.chkOption:before {
 	padding-left: 20px;
 	text-align: left;

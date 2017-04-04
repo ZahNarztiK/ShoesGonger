@@ -175,7 +175,7 @@ $(function(){
 
 	$('#sg_toggleClearList').click(()=>$('#clearList').toggle());
 
-	//document.addEventListener("contextmenu",e=>e.preventDefault());
+	//$(document).contextmenu(e=>e.preventDefault());
 
 	sg_load();
 });

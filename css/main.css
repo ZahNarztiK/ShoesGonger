@@ -48,7 +48,7 @@ section#header {
 	line-height: 34px;
 	background-color: #eee;
 }
-section#header * {
+section#header div {
 	height: 34px;
 	line-height: 34px;
 }
@@ -60,7 +60,7 @@ section#header .version {
 	display: inline-block;
 }
 section#keyword input {
-	width: 180px;
+	width: 220px;
 }
 section#interval input {
 	text-align: center;
@@ -98,6 +98,56 @@ section#clear #sg_toggleClearList {
 	right: 0;
 	position: absolute;
 }
+section#option:before {
+	content: 'OPTION';
+}
+section#option {
+	padding: 0 15px;
+	top: 0;
+	left: 160px;
+	height: 34px;
+	line-height: 34px;
+	position: absolute;
+	background-color: #e0e0e0;
+	transition: background 0.7s;
+}
+section#option:hover {
+	background-color: #d5d5d5;
+}
+section#option .sub-section {
+	padding: 0;
+	top: 34px;
+	left: 0;
+	height: 0;
+	width: 190px;
+	overflow: hidden;
+	opacity: 0;
+	display: block;
+	position: absolute;
+	background-color: #fff;
+	transition: opacity 0.7s;
+	box-shadow: 0px 4px 8px 0px rgba(0,0,0,0.2);
+	z-index: 9999;
+}
+section#option:hover .sub-section {
+	padding: 8px 14px;
+	opacity: 1;
+	width: 190px;
+	display: block;
+	height: auto;
+}
+section#option .sub-section .option-list {
+	margin: 2px 0;
+	width: 100%;
+	display: block;
+	position: relative;
+}
+section#option .sub-section .option-list .checkbox {
+	width: 100%;
+	display: block;
+	position: relative;
+}
+
 section#counter {
 	padding: 0 10px 0 15px;
 	top: 0;
@@ -149,6 +199,11 @@ section#interval .inputborder input {
 	position: relative;
 	float: left;
 }
+.checkbox:after {
+	content: '';
+	clear: both;
+	display: block;
+}
 .checkbox label {
 	width: 16px;
 	height: 16px;
@@ -187,15 +242,17 @@ section#interval .inputborder input {
 	text-align: right;
 	width: 86px;
 }
+.checkbox label[for=sg_inverse]:before, .checkbox label[for=sg_redirect]:before {
+	font-size: 0.65em;
+	padding-left: 20px;
+	text-align: left;
+	width: 142px;
+}
 .checkbox label[for=sg_inverse]:before {
-	content: 'REFRESH WHEN NO KEYWORD FOUND';
-	text-align: right;
-	width: 226px;
+	content: 'WORK WHEN NO KEYWORD FOUND';
 }
 .checkbox label[for=sg_redirect]:before {
-	content: 'WORK ON URL CHANGED';
-	text-align: right;
-	width: 154px;
+	content: 'WORK WHEN URL CHANGED';
 }
 .checkbox label.chkOption:before {
 	padding-left: 20px;

@@ -194,9 +194,9 @@ chrome.extension.onConnect.addListener(function(room){
 chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 	if(sender.tab.id==tid){
 		if(run&&request.daimai!=undefined){
-			console.log("  Tab["+tid+"]: "+((request.daimai!=sg_info.inverse)?"dai":"mai dai"));
+			console.log("  Tab["+tid+"]: "+((request.daimai==sg_info.inverse)?"dai":"mai dai"));
 			clearTimeout(timerOut);
-			if (request.daimai!=sg_info.inverse){
+			if (request.daimai==sg_info.inverse){
 				switch(reconfirm++){
 					case 0:
 						console.log("  SV: Immediately reconfirm");

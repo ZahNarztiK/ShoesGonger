@@ -32,7 +32,7 @@ function postCmd(cmd) { room.postMessage(cmd); }
 function sg_availKW() { return $('#sg_keyword').val().trim().length>0; }
 
 function sg_load(){
-	chrome.storage.sync.get(null,function(save){
+	chrome.storage.sync.get(null,save=>{
 		sg_info=sg_defaultInfo;
 		for(var k in save) if(k in sg_info) sg_info[k]=save[k];
 		sg_clearList=sg_defaultClearList;
@@ -47,6 +47,8 @@ function sg_load(){
 function sg_setCounter(n) { $('#sg_counter').html(n); }
 
 function sg_setClearList(status){
+	if(run) return;
+	$('.clearList').each(function(){ $(this).prop("checked",status); });
 	sg_clearList=sg_defaultClearList;
 	for(var k in sg_clearList)
 		sg_clearList[k]=status;
@@ -105,8 +107,8 @@ function sg_stop() {
 }
 
 $(function(){
-	room = chrome.extension.connect({ name: "GongChatRoom" });
-	room.onMessage.addListener(function(msg) {
+	room = chrome.extension.connect({ name:"GongChatRoom" });
+	room.onMessage.addListener(msg=>{
 		var cmd=msg.split(" ",1)[0];
 		var tail=msg.substr(cmd.length+1);
 		switch(cmd){
@@ -167,17 +169,11 @@ $(function(){
 		if(e.keyCode==13) sg_toggle();
 	});
 
-	$('#sg_selectAll').click(function(){
-		$('.clearList').each(function(){ $(this).prop("checked",true); });
-		sg_setClearList(true);
-	});
+	$('#sg_selectAll').click(()=>sg_setClearList(true));
 
-	$('#sg_selectNone').click(function(){
-		$('.clearList').each(function(){ $(this).prop("checked",false); });
-		sg_setClearList(false);
-	});
+	$('#sg_selectNone').click(()=>sg_setClearList(false));
 
-	$('#sg_toggleClearList').click(function(){ $('#clearList').toggle(); });
+	$('#sg_toggleClearList').click(()=>$('#clearList').toggle());
 
 	//document.addEventListener("contextmenu",e=>e.preventDefault());
 

@@ -17,7 +17,7 @@
 		{
 			"run_at": "document_end",
 			"matches": ["<all_urls>"],
-			"js": ["jquery-1.7.2.js","shgg.js"]
+			"js": ["shgg.js"]
 		}
 	],
 

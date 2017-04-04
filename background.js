@@ -44,7 +44,7 @@ var reloadPage;
 
 function chkError(tabId,str)
 {
-	chkTid(tabId,str,function(){
+	chkTid(tabId,str,()=>{
 		if(run){
 			if(str!="") console.log(str);
 			stopRun();
@@ -66,7 +66,7 @@ function delayedReconfirm()
 	console.log("  SV: Wait for delayed reconfirm "+reconfirmTime+" s");
 	chrome.browserAction.setIcon({path:"icon/icon16y.png"});
 	soundPreAlert.play();
-	timerOut=setTimeout(function(){
+	timerOut=setTimeout(()=>{
 		console.log("  SV: Delayed reconfirm");
 		chrome.tabs.executeScript(tid,{code:"sg_chk();"});
 	},reconfirmTime);
@@ -75,7 +75,7 @@ function delayedReconfirm()
 function loadSettings(){
 	stopAlert();
 	stopSound(soundError);
-	chrome.storage.sync.get(null,function(save){
+	chrome.storage.sync.get(null,save=>{
 		console.log("-Load settings-\n"+JSON.stringify(save));
 		sg_info=sg_defaultInfo;
 		for(var k in save) if(k in sg_info) sg_info[k]=save[k];
@@ -97,10 +97,10 @@ function reloadPageDefault(){
 	reconfirm=0;
 	timeBypass=false;
 	if(sg_info.dataClear&&sg_clearList!={})
-		chrome.browsingData.remove({since:0},sg_clearList,function(){ chrome.tabs.reload(tid); });
+		chrome.browsingData.remove({since:0},sg_clearList,()=>chrome.tabs.reload(tid));
 	else chrome.tabs.reload(tid);
 	console.log("  Timer: Wait timeout "+timeout+" ms");
-	timerOut=setTimeout(function(){
+	timerOut=setTimeout(()=>{
 		if(run){
 			console.log("  Timer: Timed out, Re!");
 			reloadPage();
@@ -114,7 +114,7 @@ function reloadPageTime(){
 	timeBypass=false;
 	timerIntervalDisabled=false;
 	console.log("  Timer: Wait cycle "+sg_info.delayed+" ms");
-	timerInterval=setTimeout(function(){
+	timerInterval=setTimeout(()=>{
 		if(run){
 			if(timeBypass){
 				console.log("  Timer: Cycled, Re!");
@@ -146,9 +146,9 @@ function toggle(){
 	console.log(run?"Stop":"Start");
 	if(run=!run){
 		loadSettings();
-		chrome.windows.getCurrent(function(win){
+		chrome.windows.getCurrent(win=>{
 			console.log(" WinID: ["+(wid=win.id)+"]");
-			chrome.tabs.query({active:true,windowId:wid},function(tab){
+			chrome.tabs.query({active:true,windowId:wid},tab=>{
 				console.log(" TabID: ["+(tid = tab[0].id)+"]");
 				runURL=tab[0].url;
 				timerIntervalDisabled=true;
@@ -163,11 +163,11 @@ function toggle(){
 	chrome.browserAction.setIcon({path:"icon/icon16"+ (run?"r":"")+".png"});
 }
 
-chrome.extension.onConnect.addListener(function(room){
+chrome.extension.onConnect.addListener(room=>{
 	chatRoom=room;
 	chatOpen=true;
 	console.log("*- Connected to "+room.name+" -*");
-	room.onMessage.addListener(function(msg){
+	room.onMessage.addListener(msg=>{
 		var cmd=msg.split(" ",1)[0];
 		var tail=msg.substr(cmd.length+1);
 		console.log(cmd+"\n  ["+(tail?tail:"N/A")+"]");
@@ -185,16 +185,16 @@ chrome.extension.onConnect.addListener(function(room){
 		}
 		console.log("* Do: "+cmd);
 	});
-	room.onDisconnect.addListener(function(msg){
+	room.onDisconnect.addListener(msg=>{
 		chatOpen=false;
 		console.log("*- Disconnected -*");
 	});
 });
 
-chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
+chrome.runtime.onMessage.addListener((request,sender,sendResponse)=>{
 	if(sender.tab.id==tid){
 		if(run&&request.daimai!=undefined){
-			console.log("  Tab["+tid+"]: "+((request.daimai!=sg_info.inverse)?"dai":"mai dai"));
+			console.log("  Tab["+tid+"]: "+(request.daimai!=sg_info.inverse?"dai":"mai dai"));
 			clearTimeout(timerOut);
 			if (request.daimai!=sg_info.inverse){
 				switch(reconfirm++){
@@ -203,7 +203,7 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 						chrome.tabs.executeScript(tid,{code:"sg_chk();"});
 						return;
 					case 1:
-						chrome.tabs.get(tid,function(tab){
+						chrome.tabs.get(tid,tab=>{
 							if(tab.status=="complete") delayedReconfirm();
 							else console.log("  SV: Wait for complete loading");
 						});
@@ -229,19 +229,17 @@ chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
 	}
 });
 
-chrome.tabs.onActivated.addListener(function(info){
-	chkTid(info.tabId,"");
-});
+chrome.tabs.onActivated.addListener(info=>chkTid(info.tabId,""));
 
-chrome.tabs.onRemoved.addListener(function(tabId,info){
-	chkError(tabId,"  SV: Tab["+tid+"] was closed, Stop!");
-});
+chrome.tabs.onRemoved.addListener((tabId,info)=>
+	chkError(tabId,"  SV: Tab["+tid+"] was closed, Stop!")
+);
 
-chrome.tabs.onReplaced.addListener(function(addedTabId,removedTabId){
-	chkError(removedTabId,"  SV: Tab["+removedTabId+"] was replaced w/ Tab["+addedTabId+"], Stop!");
-});
+chrome.tabs.onReplaced.addListener((addedTabId,removedTabId)=>
+	chkError(removedTabId,"  SV: Tab["+removedTabId+"] was replaced w/ Tab["+addedTabId+"], Stop!")
+);
 
-chrome.tabs.onUpdated.addListener(function(tabId,info,tab){
+chrome.tabs.onUpdated.addListener((tabId,info,tab)=>{
 	if(run&&tabId==tid){
 		if(!sg_info.redirect&&tab.url!=runURL){
 			console.log("  SV: URL was changed, Stop!");

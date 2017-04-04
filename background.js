@@ -56,7 +56,7 @@ function chkError(tabId,str)
 function chkTid(tabId,str,func){
 	if(tabId==tid){
 		stopAlert();
-		func();
+		if(func!=undefined) func();
 	}
 }
 

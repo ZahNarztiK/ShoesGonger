@@ -3,7 +3,8 @@ var sg_defaultInfo={
 		dataClear:false,
 		delayed:0,
 		inverse:false,
-		redirect:false
+		redirect:false,
+		run:false
 	},
 	sg_defaultClearList={
 		appcache: false,
@@ -19,7 +20,7 @@ var sg_defaultInfo={
 		passwords: false,
 		webSQL: false
 	},
-	sg_info,sg_clearList;
+	sg_info=sg_defaultInfo,sg_clearList;
 
 var	tid,
 	wid,
@@ -27,11 +28,12 @@ var	tid,
 	reconfirm=0,
 	reconfirmTime=5000,
 	timeoutDefault=10000,
-	run=false,
-	runURL,
-	timerInterval,timerOut,
-	timerIntervalDisabled,timeout,timeBypass,
-	soundAlert=new Audio("sfx/alert.mp3"),
+	runURL;
+
+var	timerInterval,timerOut,
+	timerIntervalDisabled,timeout,timeBypass;
+
+var	soundAlert=new Audio("sfx/alert.mp3"),
 	soundError=new Audio("sfx/error.mp3"),
 	soundPreAlert=new Audio("sfx/prealert.mp3");
 
@@ -45,7 +47,7 @@ var reloadPage;
 function chkError(tabId,str)
 {
 	chkTid(tabId,str,()=>{
-		if(run){
+		if(sg_info.run){
 			if(str!="") console.log(str);
 			stopRun();
 			soundError.play();
@@ -101,7 +103,7 @@ function reloadPageDefault(){
 	else chrome.tabs.reload(tid);
 	console.log("  Timer: Wait timeout "+timeout+" ms");
 	timerOut=setTimeout(()=>{
-		if(run){
+		if(sg_info.run){
 			console.log("  Timer: Timed out, Re!");
 			reloadPage();
 		}
@@ -115,7 +117,7 @@ function reloadPageTime(){
 	timerIntervalDisabled=false;
 	console.log("  Timer: Wait cycle "+sg_info.delayed+" ms");
 	timerInterval=setTimeout(()=>{
-		if(run){
+		if(sg_info.run){
 			if(timeBypass){
 				console.log("  Timer: Cycled, Re!");
 				reloadPage();
@@ -143,8 +145,9 @@ function stopRun(){
 }
 
 function toggle(){
-	console.log(run?"Stop":"Start");
-	if(run=!run){
+	console.log((sg_info.run=!sg_info.run)?"Start":"Stop");
+	chrome.storage.sync.set({run:sg_info.run});
+	if(sg_info.run){
 		loadSettings();
 		chrome.windows.getCurrent(win=>{
 			console.log(" WinID: ["+(wid=win.id)+"]");
@@ -160,7 +163,7 @@ function toggle(){
 		clearTimeout(timerOut);
 		stopSound(soundPreAlert);;
 	}
-	chrome.browserAction.setIcon({path:"icon/icon16"+ (run?"r":"")+".png"});
+	chrome.browserAction.setIcon({path:"icon/icon16"+(sg_info.run?"r":"")+".png"});
 }
 
 chrome.extension.onConnect.addListener(room=>{
@@ -174,9 +177,6 @@ chrome.extension.onConnect.addListener(room=>{
 		switch(cmd){
 			case "getCounter":
 				room.postMessage("setCounter "+counter);
-				break;
-			case "getRun":
-				room.postMessage("setRun "+(run?1:0));
 				break;
 			case "Toggle":
 				toggle();
@@ -193,7 +193,7 @@ chrome.extension.onConnect.addListener(room=>{
 
 chrome.runtime.onMessage.addListener((request,sender,sendResponse)=>{
 	if(sender.tab.id==tid){
-		if(run&&request.daimai!=undefined){
+		if(sg_info.run&&request.daimai!=undefined){
 			console.log("  Tab["+tid+"]: "+(request.daimai!=sg_info.inverse?"dai":"mai dai"));
 			clearTimeout(timerOut);
 			if (request.daimai!=sg_info.inverse){
@@ -240,7 +240,7 @@ chrome.tabs.onReplaced.addListener((addedTabId,removedTabId)=>
 );
 
 chrome.tabs.onUpdated.addListener((tabId,info,tab)=>{
-	if(run&&tabId==tid){
+	if(sg_info.run&&tabId==tid){
 		if(!sg_info.redirect&&tab.url!=runURL){
 			console.log("  SV: URL was changed, Stop!");
 			stopRun();
@@ -252,3 +252,5 @@ chrome.tabs.onUpdated.addListener((tabId,info,tab)=>{
 		}	
 	}
 });
+
+chrome.storage.sync.set({run:false});

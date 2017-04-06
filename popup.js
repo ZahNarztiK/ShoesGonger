@@ -1,10 +1,10 @@
 var sg_defaultInfo={
 		owrai:"",
 		dataClear:false,
-		delayed:0,
+		delayed:1000,
 		focusFin:false,
 		inverse:false,
-		redirect:false,
+		noredirect:false,
 		run:false
 	},
 	sg_defaultClearList={

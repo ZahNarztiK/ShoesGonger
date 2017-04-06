@@ -1,10 +1,10 @@
 var sg_defaultInfo={
 		owrai:"",
 		dataClear:false,
-		delayed:0,
+		delayed:1000,
 		focusFin:false,
 		inverse:false,
-		redirect:false,
+		noredirect:false,
 		run:false
 	},
 	sg_defaultClearList={
@@ -241,7 +241,7 @@ chrome.tabs.onReplaced.addListener((addedTabId,removedTabId)=>
 
 chrome.tabs.onUpdated.addListener((tabId,info,tab)=>{
 	if(sg_info.run&&tabId==tid){
-		if(!sg_info.redirect&&tab.url!=runURL){
+		if(sg_info.noredirect&&tab.url!=runURL){
 			console.log("  SV: URL was changed, Stop!");
 			stopRun();
 			soundError.play();

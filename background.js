@@ -2,6 +2,7 @@ var sg_defaultInfo={
 		owrai:"",
 		dataClear:false,
 		delayed:0,
+		focusFin:false,
 		inverse:false,
 		redirect:false,
 		run:false
@@ -38,7 +39,6 @@ var	soundAlert=new Audio("sfx/alert.mp3"),
 	soundPreAlert=new Audio("sfx/prealert.mp3");
 
 soundAlert.loop=true;
-soundPreAlert.loop=true;
 
 var chatRoom,chatOpen=false;
 
@@ -185,13 +185,13 @@ chrome.extension.onConnect.addListener(room=>{
 		}
 		console.log("* Do: "+cmd);
 	});
-	room.onDisconnect.addListener(msg=>{
+	room.onDisconnect.addListener(()=>{
 		chatOpen=false;
 		console.log("*- Disconnected -*");
 	});
 });
 
-chrome.runtime.onMessage.addListener((request,sender,sendResponse)=>{
+chrome.runtime.onMessage.addListener((request,sender)=>{
 	if(sender.tab.id==tid){
 		if(sg_info.run&&request.daimai!=undefined){
 			console.log("  Tab["+tid+"]: "+(request.daimai!=sg_info.inverse?"dai":"mai dai"));
@@ -212,7 +212,9 @@ chrome.runtime.onMessage.addListener((request,sender,sendResponse)=>{
 				}
 				console.log("  SV: OK!!!");
 				stopRun();
-				soundAlert.play();
+				if(sg_info.focusFin)
+					chrome.tabs.get(tid,tab=>chrome.tabs.highlight({windowId:wid,tabs:tab.index},()=>soundAlert.play()));
+				else soundAlert.play();
 				chrome.browserAction.setIcon({path:"icon/icon16g.png"});
 			}
 			else{
@@ -231,9 +233,7 @@ chrome.runtime.onMessage.addListener((request,sender,sendResponse)=>{
 
 chrome.tabs.onActivated.addListener(info=>chkTid(info.tabId,""));
 
-chrome.tabs.onRemoved.addListener((tabId,info)=>
-	chkError(tabId,"  SV: Tab["+tid+"] was closed, Stop!")
-);
+chrome.tabs.onRemoved.addListener(tabId=>chkError(tabId,"  SV: Tab["+tid+"] was closed, Stop!"));
 
 chrome.tabs.onReplaced.addListener((addedTabId,removedTabId)=>
 	chkError(removedTabId,"  SV: Tab["+removedTabId+"] was replaced w/ Tab["+addedTabId+"], Stop!")

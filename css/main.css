@@ -242,7 +242,7 @@ section#interval .inputborder input {
 	text-align: right;
 	width: 86px;
 }
-.checkbox label[for=sg_inverse]:before, .checkbox label[for=sg_redirect]:before {
+.checkbox label[for=sg_inverse]:before, .checkbox label[for=sg_redirect]:before, .checkbox label[for=sg_focusFin]:before {
 	font-size: 0.65em;
 	padding-left: 20px;
 	text-align: left;
@@ -252,7 +252,10 @@ section#interval .inputborder input {
 	content: 'WORK WHEN NO KEYWORD FOUND';
 }
 .checkbox label[for=sg_redirect]:before {
-	content: 'WORK WHEN URL CHANGED';
+	content: 'WORK EVEN URL CHANGED';
+}
+.checkbox label[for=sg_focusFin]:before {
+	content: 'FOCUS WHEN FINISH';
 }
 .checkbox label.chkOption:before {
 	padding-left: 20px;

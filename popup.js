@@ -2,6 +2,7 @@ var sg_defaultInfo={
 		owrai:"",
 		dataClear:false,
 		delayed:0,
+		focusFin:false,
 		inverse:false,
 		redirect:false,
 		run:false

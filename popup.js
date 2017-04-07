@@ -3,8 +3,10 @@ var sg_defaultInfo={
 		dataClear:false,
 		delayed:1000,
 		focusFin:false,
+		focusFinW:false,
 		inverse:false,
 		noredirect:false,
+		noti:false,
 		run:false
 	},
 	sg_defaultClearList={
@@ -72,6 +74,7 @@ function sg_setFormAvail(){
 	$('#sg_button').attr("class",sg_info.run?"stop":(sg_availKW()?"start":""));
 	$('#clear').attr("class",sg_info.run?"disable":"");
 	$('.dis').prop("disabled",sg_info.run);
+	$('#sg_focusFinW').prop("disabled",!sg_info.focusFin);
 	sg_setCounter(counter);
 }
 
@@ -126,6 +129,13 @@ $(function(){
 	$('.clearList').change(function(){
 		sg_clearList[$(this).attr("name")]=$(this).prop("checked");
 		chrome.storage.sync.set({dataClearList:sg_clearList});
+	});
+
+	$('#sg_focusFin').change(function(){
+		var obj={};
+		sg_info[$(this).attr("name")]=(obj[$(this).attr("name")]=$(this).prop("checked"));		
+		chrome.storage.sync.set(obj);
+		$('#sg_focusFinW').prop("disabled",!sg_info.focusFin);
 	});
 
 	$('#modal-no').click(sg_confirm_close);

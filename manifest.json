@@ -32,6 +32,10 @@
 	},
 
 	"permissions": [
-		"activeTab", "browsingData", "storage" , "tabs", "webNavigation", "*://*/*"
+		"activeTab", "browsingData", "notifications", "storage" , "tabs", "webNavigation", "*://*/*"
+	],
+
+	"web_accessible_resources": [
+		"icon/noti.png"
 	]
 }

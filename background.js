@@ -3,8 +3,10 @@ var sg_defaultInfo={
 		dataClear:false,
 		delayed:1000,
 		focusFin:false,
+		focusFinW:false,
 		inverse:false,
 		noredirect:false,
+		noti:false,
 		run:false
 	},
 	sg_defaultClearList={
@@ -40,12 +42,20 @@ var	soundAlert=new Audio("sfx/alert.mp3"),
 
 soundAlert.loop=true;
 
+var	notiID="ShoesGongerNoti",
+	notiObj={
+		type:"basic",
+		priority:2,
+		iconUrl:"icon/icon64.png",
+		title:"Shoes Gonger",
+		message:"The Gonging has been finished!!"
+	};
+
 var chatRoom,chatOpen=false;
 
 var reloadPage;
 
-function chkError(tabId,str)
-{
+function chkError(tabId,str){
 	chkTid(tabId,str,()=>{
 		if(sg_info.run){
 			if(str!="") console.log(str);
@@ -55,18 +65,51 @@ function chkError(tabId,str)
 	});
 }
 
+function chkFinSettings(){
+	if(sg_info.focusFin){
+		console.log("  SV: Focus Tab");
+		chrome.tabs.get(tid,tab=>chrome.tabs.highlight({windowId:wid,tabs:tab.index},()=>{
+			chkNoti(()=>{
+				console.log("  SV: Set Focus Window status");
+				chrome.windows.update(wid,sg_info.focusFinW?{drawAttention:true,focused:true}:{drawAttention:true});
+			});
+		}));
+	}
+	else{
+		console.log("  SV: No Focus");
+		chrome.windows.update(wid,{drawAttention:true},chkNoti);
+	}
+}
+
 function chkTid(tabId,str,func){
 	if(tabId==tid){
-		stopAlert();
+		if(reconfirm==4) stopAlert();
 		if(func!=undefined) func();
 	}
 }
 
-function delayedReconfirm()
-{
+function chkNoti(func){
+	if(sg_info.noti){
+		console.log("  SV: Noti");
+		chrome.notifications.create(notiID,notiObj,()=>{
+			if(func!=undefined) func();
+			soundAlert.play();
+			chrome.browserAction.setIcon({path:"icon/icon16g.png"});
+		});
+	}
+	else{
+		console.log("  SV: No Noti");
+		if(func!=undefined) func();
+		soundAlert.play();
+		chrome.browserAction.setIcon({path:"icon/icon16g.png"});
+	}
+}
+
+function delayedReconfirm(){
 	reconfirm++;
 	console.log("  SV: Wait for delayed reconfirm "+reconfirmTime+" s");
 	chrome.browserAction.setIcon({path:"icon/icon16y.png"});
+	chrome.windows.update(wid,{drawAttention:true});
 	soundPreAlert.play();
 	timerOut=setTimeout(()=>{
 		console.log("  SV: Delayed reconfirm");
@@ -127,14 +170,13 @@ function reloadPageTime(){
 	},sg_info.delayed);
 }
 
-function stopAlert()
-{
+function stopAlert(){
+	chrome.notifications.clear(notiID);
 	stopSound(soundAlert);
 	chrome.browserAction.setIcon({path:"icon/icon16.png"});
 }
 
-function stopSound(sound)
-{
+function stopSound(sound){
 	sound.pause();
 	sound.currentTime=0;
 }
@@ -191,6 +233,17 @@ chrome.extension.onConnect.addListener(room=>{
 	});
 });
 
+chrome.notifications.onClicked.addListener(nid=>{
+	if(nid==notiID)
+		chrome.windows.update(wid,{focused:true},()=>
+			chrome.tabs.get(tid,tab=>chrome.tabs.highlight({windowId:wid,tabs:tab.index},()=>{
+				chrome.notifications.clear(nid);
+				stopAlert();
+		})));
+});
+
+chrome.notifications.onClosed.addListener((nid,byUser)=>{ if(nid==notiID&&byUser) stopAlert(); });
+
 chrome.runtime.onMessage.addListener((request,sender)=>{
 	if(sender.tab.id==tid){
 		if(sg_info.run&&request.daimai!=undefined){
@@ -212,12 +265,10 @@ chrome.runtime.onMessage.addListener((request,sender)=>{
 				}
 				console.log("  SV: OK!!!");
 				stopRun();
-				if(sg_info.focusFin)
-					chrome.tabs.get(tid,tab=>chrome.tabs.highlight({windowId:wid,tabs:tab.index},()=>soundAlert.play()));
-				else soundAlert.play();
-				chrome.browserAction.setIcon({path:"icon/icon16g.png"});
+				chkFinSettings();
 			}
 			else{
+				chrome.windows.update(wid,{drawAttention:false});
 				stopSound(soundPreAlert);;
 				chrome.browserAction.setIcon({path:"icon/icon16r.png"});
 				if(timerIntervalDisabled){

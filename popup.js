@@ -169,6 +169,15 @@ $(function(){
 		if(e.keyCode==13) sg_toggle();
 	});
 
+	$('#sg_reset').click(()=>{
+		if(!sg_info.run)
+			chrome.storage.sync.clear(()=>{
+				var obj=(sg_info=sg_defaultInfo);
+				obj["dataClearList"]=(sg_clearList=sg_defaultClearList);
+				chrome.storage.sync.set(obj,sg_setForm);
+			});
+	});
+
 	$('#sg_selectAll').click(()=>sg_setClearList(true));
 
 	$('#sg_selectNone').click(()=>sg_setClearList(false));

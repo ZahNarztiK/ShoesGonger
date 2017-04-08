@@ -7,6 +7,8 @@ var sg_defaultInfo={
 		inverse:false,
 		noredirect:false,
 		noti:false,
+		proxy:false,
+		proxyIP:"",
 		run:false
 	},
 	sg_defaultClearList={
@@ -51,6 +53,16 @@ var	notiID="ShoesGongerNoti",
 		message:"The Gonging has been finished!!"
 	};
 
+var proxNone={ mode:"direct" },
+	proxUsed={
+		mode:"fixed_servers",
+		rules:{
+			singleProxy:{ host:"158.69.157.32" },
+			bypassList:["<local>"]
+		}
+	},
+	proxScheme=["http","https","socks4","socks5"];
+
 var chatRoom,chatOpen=false;
 
 var reloadPage;
@@ -79,6 +91,16 @@ function chkFinSettings(){
 		console.log("  SV: No Focus");
 		chrome.windows.update(wid,{drawAttention:true},chkNoti);
 	}
+}
+
+function chkIP(ip)
+{
+	var ips=ip.split('.');
+	if(ips.length!=4) { console.log("  SV: IP validation failed!"); return false; }
+	for(var i=0;i<3;i++) if(isNaN(ips[i])||ips[i]==0) { console.log("  SV: IP validation failed!"); return false; }
+	ips=ips[3].split(':');
+	for(var i=0;i<ips.length;i++) if(isNaN(ips[i])||ips[i]==0) { console.log("  SV: IP validation failed!"); return false; }
+	return true;
 }
 
 function chkTid(tabId,str,func){
@@ -117,9 +139,18 @@ function delayedReconfirm(){
 	},reconfirmTime);
 }
 
-function loadSettings(){
+function loadProxy(){
+	console.log("  SV: Load Proxy for Testing");
+	chrome.storage.sync.get("proxyIP",save=>{
+		sg_info.proxyIP=save.proxyIP;
+		runProxy();
+	});
+}
+
+function loadSettings(func){
 	stopAlert();
 	stopSound(soundError);
+	counter=0;
 	chrome.storage.sync.get(null,save=>{
 		console.log("-Load settings-\n"+JSON.stringify(save));
 		sg_info=sg_defaultInfo;
@@ -130,8 +161,8 @@ function loadSettings(){
 		timeout=sg_info.delayed+timeoutDefault;
 		console.log("-sg_info-\n"+JSON.stringify(sg_info));
 		console.log("-sg_clearList-\n"+JSON.stringify(sg_clearList));
+		if(func!=undefined) func();
 	});
-	counter=0;
 }
 
 function postCmd(cmd) { if(chatOpen) chatRoom.postMessage(cmd); }
@@ -170,15 +201,38 @@ function reloadPageTime(){
 	},sg_info.delayed);
 }
 
+function runProxy(func)
+{
+	if(!chkIP(sg_info.proxyIP)){
+		stopProxy(func);
+		return;
+	}
+	chrome.storage.sync.set({proxy:(sg_info.proxy=true)});
+	var ip=sg_info.proxyIP.split(':');
+	proxUsed.rules.singleProxy.host=ip[0];
+	if(ip.length==2) proxUsed.rules.singleProxy.port=Number(ip[1]);
+	console.log("  SV: Proxy set up: "+ip[0]+(ip.length==2?":"+ip[1]:""));
+	chrome.proxy.settings.set({
+			value:proxUsed,
+			scope:"regular"
+		},	
+		()=>{ if(func!=undefined) func(); });
+}
+
 function stopAlert(){
 	chrome.notifications.clear(notiID);
 	stopSound(soundAlert);
 	chrome.browserAction.setIcon({path:"icon/icon16.png"});
 }
 
-function stopSound(sound){
-	sound.pause();
-	sound.currentTime=0;
+function stopProxy(func){
+	console.log("  SV: Proxy cleared");
+	chrome.storage.sync.set({proxy:(sg_info.proxy=false)});
+	chrome.proxy.settings.set({
+			value:proxNone,
+			scope:"regular"
+		},	
+		()=>{ if(func!=undefined) func(); });
 }
 
 function stopRun(){
@@ -186,12 +240,17 @@ function stopRun(){
 	postCmd("Stop");
 }
 
+function stopSound(sound){
+	sound.pause();
+	sound.currentTime=0;
+}
+
 function toggle(){
-	console.log((sg_info.run=!sg_info.run)?"Start":"Stop");
-	chrome.storage.sync.set({run:sg_info.run});
+	
+	chrome.storage.sync.set({run:(sg_info.run=!sg_info.run)});
+	console.log(sg_info.run?"Start":"Stop");
 	if(sg_info.run){
-		loadSettings();
-		chrome.windows.getCurrent(win=>{
+		loadSettings(()=>chrome.windows.getCurrent(win=>{
 			console.log(" WinID: ["+(wid=win.id)+"]");
 			chrome.tabs.query({active:true,windowId:wid},tab=>{
 				console.log(" TabID: ["+(tid = tab[0].id)+"]");
@@ -199,11 +258,11 @@ function toggle(){
 				timerIntervalDisabled=true;
 				(reloadPage=(sg_info.delayed>0?reloadPageTime:reloadPageDefault))();
 			});
-		});
+		}));
 	}
 	else{
 		clearTimeout(timerOut);
-		stopSound(soundPreAlert);;
+		stopSound(soundPreAlert);
 	}
 	chrome.browserAction.setIcon({path:"icon/icon16"+(sg_info.run?"r":"")+".png"});
 }
@@ -220,12 +279,15 @@ chrome.extension.onConnect.addListener(room=>{
 			case "getCounter":
 				room.postMessage("setCounter "+counter);
 				break;
+			case "Proxyosas":
+				sg_info.proxy?stopProxy():loadProxy();
+				break;
 			case "Toggle":
 				toggle();
 				break;
 			default: return;
 		}
-		console.log("* Do: "+cmd);
+		console.log("* Done: "+cmd);
 	});
 	room.onDisconnect.addListener(()=>{
 		chatOpen=false;
@@ -246,36 +308,38 @@ chrome.notifications.onClosed.addListener((nid,byUser)=>{ if(nid==notiID&&byUser
 
 chrome.runtime.onMessage.addListener((request,sender)=>{
 	if(sender.tab.id==tid){
-		if(sg_info.run&&request.daimai!=undefined){
-			console.log("  Tab["+tid+"]: "+(request.daimai!=sg_info.inverse?"dai":"mai dai"));
-			clearTimeout(timerOut);
-			if (request.daimai!=sg_info.inverse){
-				switch(reconfirm++){
-					case 0:
-						console.log("  SV: Immediately reconfirm");
-						chrome.tabs.executeScript(tid,{code:"sg_chk();"});
-						return;
-					case 1:
-						chrome.tabs.get(tid,tab=>{
-							if(tab.status=="complete") delayedReconfirm();
-							else console.log("  SV: Wait for complete loading");
-						});
-						return;
-					default: break;
+		if(sg_info.run){
+			if(request.daimai!=undefined){
+				console.log("  Tab["+tid+"]: "+(request.daimai!=sg_info.inverse?"dai":"mai dai"));
+				clearTimeout(timerOut);
+				if (request.daimai!=sg_info.inverse){
+					switch(reconfirm++){
+						case 0:
+							console.log("  SV: Immediately reconfirm");
+							chrome.tabs.executeScript(tid,{code:"sg_chk();"});
+							return;
+						case 1:
+							chrome.tabs.get(tid,tab=>{
+								if(tab.status=="complete") delayedReconfirm();
+								else console.log("  SV: Wait for complete loading");
+							});
+							return;
+						default: break;
+					}
+					console.log("  SV: OK!!!");
+					stopRun();
+					chkFinSettings();
 				}
-				console.log("  SV: OK!!!");
-				stopRun();
-				chkFinSettings();
-			}
-			else{
-				chrome.windows.update(wid,{drawAttention:false});
-				stopSound(soundPreAlert);;
-				chrome.browserAction.setIcon({path:"icon/icon16r.png"});
-				if(timerIntervalDisabled){
-					console.log("  SV: Extra-cycled, Re!");
-					reloadPage();
+				else{
+					chrome.windows.update(wid,{drawAttention:false});
+					stopSound(soundPreAlert);;
+					chrome.browserAction.setIcon({path:"icon/icon16r.png"});
+					if(timerIntervalDisabled){
+						console.log("  SV: Extra-cycled, Re!");
+						reloadPage();
+					}
+					else timeBypass=true;
 				}
-				else timeBypass=true;
 			}
 		}
 		else if(request.yuudwoi!=undefined) stopAlert();
@@ -300,8 +364,9 @@ chrome.tabs.onUpdated.addListener((tabId,info,tab)=>{
 		else if(reconfirm==2){
 			console.log("  Tab ["+tid+"]: Load Complete");
 			delayedReconfirm();
-		}	
+		}
 	}
 });
 
 chrome.storage.sync.set({run:false});
+stopProxy();

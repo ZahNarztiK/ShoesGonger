@@ -32,7 +32,7 @@
 	},
 
 	"permissions": [
-		"activeTab", "browsingData", "notifications", "storage" , "tabs", "webNavigation", "*://*/*"
+		"activeTab", "browsingData", "notifications", "proxy", "storage" , "tabs", "webNavigation", "*://*/*"
 	],
 
 	"web_accessible_resources": [

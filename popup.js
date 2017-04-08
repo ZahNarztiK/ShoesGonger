@@ -7,6 +7,8 @@ var sg_defaultInfo={
 		inverse:false,
 		noredirect:false,
 		noti:false,
+		proxy:false,
+		proxyIP:"",
 		run:false
 	},
 	sg_defaultClearList={
@@ -29,6 +31,16 @@ var counter=0;
 
 var room;
 
+function chkIP(ip)
+{
+	var ips=ip.split('.');
+	if(ips.length!=4) return false;
+	for(var i=0;i<3;i++) if(isNaN(ips[i])||ips[i]==0) return false;
+	ips=ips[3].split(':');
+	for(var i=0;i<ips.length;i++) if(isNaN(ips[i])||ips[i]==0) return false;
+	return true;
+}
+
 function postCmd(cmd) { room.postMessage(cmd); }
 
 function sg_availKW() { return $('#sg_keyword').val().trim().length>0; }
@@ -43,6 +55,20 @@ function sg_load(){
 				if(k in sg_clearList) sg_clearList[k]=save.dataClearList[k];
 		sg_setForm();
 		postCmd("getCounter");
+	});
+}
+
+function sg_saveKeyword(kw){
+	$('#sg_button').attr("class",sg_availKW()?"start":"");
+	chrome.storage.sync.set({owrai:(sg_info.owrai=kw.trim())});
+}
+
+function sg_saveProxy(ip){
+	chrome.storage.sync.set({ proxyIP:(sg_info.proxyIP=ip) },()=>{
+		$('#sg_prox')
+		var pok=chkIP(sg_info.proxyIP);
+		$('#proxy').attr("class",pok?"":"red");
+		$('#sg_proxy').prop("disabled",!pok);
 	});
 }
 
@@ -71,10 +97,15 @@ function sg_setForm(){
 function sg_setFormAvail(){
 	$('#sg_keyword').val(sg_info.owrai);
 	$('#sg_interval').val(sg_info.delayed==0?"":sg_info.delayed);
+	$('#sg_proxyIP').val(sg_info.proxyIP);
+	var pok=chkIP(sg_info.proxyIP);
+	$('#proxy').attr("class",chkIP(sg_info.proxyIP)?"":"red");
 	$('#sg_button').attr("class",sg_info.run?"stop":(sg_availKW()?"start":""));
 	$('#clear').attr("class",sg_info.run?"disable":"");
 	$('.dis').prop("disabled",sg_info.run);
-	$('#sg_focusFinW').prop("disabled",!sg_info.focusFin);
+	$('#sg_focusFinW').prop("disabled",sg_info.run?true:!sg_info.focusFin);
+	$('#sg_proxy').prop("disabled",sg_info.run?true:!pok);
+	$('#sg_proxyIP').prop("disabled",sg_info.proxy);
 	sg_setCounter(counter);
 }
 
@@ -85,6 +116,11 @@ function sg_setRun(status){
 }
 
 function sg_toggle(){ if(sg_info.run||sg_availKW()) sg_toggleRun(); }
+
+function sg_toggleProxy(status){
+	$('#sg_proxyIP').prop("disabled",(sg_info.proxy=status));
+	postCmd("Proxyosas");
+}
 
 function sg_toggleRun(){
 	if(!sg_info.run) {
@@ -131,20 +167,18 @@ $(function(){
 		chrome.storage.sync.set({dataClearList:sg_clearList});
 	});
 
-	$('#sg_focusFin').change(function(){
-		var obj={};
-		sg_info[$(this).attr("name")]=(obj[$(this).attr("name")]=$(this).prop("checked"));		
-		chrome.storage.sync.set(obj);
-		$('#sg_focusFinW').prop("disabled",!sg_info.focusFin);
-	});
-
 	$('#modal-no').click(sg_confirm_close);
 
 	$('#modal-yes').click(sg_confirm_yes);
 
 	$('#sg_button').click(sg_toggle);
 
-	$('#sg_interval').focus(function(){ $(this).attr("placeHolder",""); });
+	$('#sg_focusFin').change(function(){
+		chrome.storage.sync.set({focusFin:(sg_info.focusFin=$(this).prop("checked"))});
+		$('#sg_focusFinW').prop("disabled",!sg_info.focusFin);
+	});
+
+	$('#sg_interval,#sg_proxyIP').focus(function(){ $(this).attr("placeHolder",""); });
 
 	$('#sg_interval').focusout(function(){ $(this).attr("placeHolder","0"); });
 
@@ -163,10 +197,25 @@ $(function(){
 		if(e.keyCode==13) sg_toggle();
 	});
 
+	$('#sg_keyword').change(function(){ sg_saveKeyword($(this).val()); });
+
 	$('#sg_keyword').keyup(function(e){
-		$('#sg_button').attr("class",sg_availKW()?"start":"");
-		chrome.storage.sync.set({owrai:(sg_info.owrai=$(this).val().trim())});
+		sg_saveKeyword($(this).val());
 		if(e.keyCode==13) sg_toggle();
+	});
+
+	$('#sg_proxy').change(function(){ sg_toggleProxy($(this).prop("checked")); });
+
+	$('#sg_proxyIP').change(function(){ sg_saveProxy($(this).val()); });
+
+	$('#sg_proxyIP').focusout(function(){ $(this).attr("placeHolder","x.x.x.x:port"); });
+
+	$('#sg_proxyIP').keyup(function(e){
+		sg_saveProxy($(this).val());
+		if(e.keyCode==13&&chkIP(sg_info.proxyIP)){
+			$('#sg_proxy').prop("checked",true);
+			sg_toggleProxy(true);
+		}
 	});
 
 	$('#sg_reset').click(()=>{

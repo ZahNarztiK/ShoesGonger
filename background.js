@@ -95,12 +95,9 @@ function chkFinSettings(){
 
 function chkIP(ip)
 {
-	var ips=ip.split('.');
-	if(ips.length!=4) { console.log("  SV: IP validation failed!"); return false; }
-	for(var i=0;i<3;i++) if(isNaN(ips[i])||ips[i]==0) { console.log("  SV: IP validation failed!"); return false; }
-	ips=ips[3].split(':');
-	for(var i=0;i<ips.length;i++) if(isNaN(ips[i])||ips[i]==0) { console.log("  SV: IP validation failed!"); return false; }
-	return true;
+	var valid=/^\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?\b$/.test(ip);
+	console.log("  SV: IP validation "+(valid?"passed":"failed"));
+	return valid;
 }
 
 function chkTid(tabId,str,func){

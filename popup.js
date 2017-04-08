@@ -31,19 +31,11 @@ var counter=0;
 
 var room;
 
-function chkIP(ip)
-{
-	var ips=ip.split('.');
-	if(ips.length!=4) return false;
-	for(var i=0;i<3;i++) if(isNaN(ips[i])||ips[i]==0) return false;
-	ips=ips[3].split(':');
-	for(var i=0;i<ips.length;i++) if(isNaN(ips[i])||ips[i]==0) return false;
-	return true;
-}
+function chkIP(ip) { return /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?$/.test(ip); }
 
 function postCmd(cmd) { room.postMessage(cmd); }
 
-function sg_availKW() { return $('#sg_keyword').val().trim().length>0; }
+function sg_availKW() { return $('#sg_keyword').val().replace(/^\s+|\s+$/g,"")!=""; }
 
 function sg_load(){
 	chrome.storage.sync.get(null,save=>{
@@ -60,14 +52,14 @@ function sg_load(){
 
 function sg_saveKeyword(kw){
 	$('#sg_button').attr("class",sg_availKW()?"start":"");
-	chrome.storage.sync.set({owrai:(sg_info.owrai=kw.trim())});
+	chrome.storage.sync.set({owrai:(sg_info.owrai=kw.replace(/^\s+|\s+$/g,""))});
 }
 
 function sg_saveProxy(ip){
-	chrome.storage.sync.set({ proxyIP:(sg_info.proxyIP=ip) },()=>{
+	chrome.storage.sync.set({ proxyIP:(sg_info.proxyIP=ip.replace(/\s+/g,"")) },()=>{
 		$('#sg_prox')
 		var pok=chkIP(sg_info.proxyIP);
-		$('#proxy').attr("class",pok?"":"red");
+		$('#proxy').attr("class",(sg_info.proxyIP==""||pok)?"":"red");
 		$('#sg_proxy').prop("disabled",!pok);
 	});
 }
@@ -99,7 +91,7 @@ function sg_setFormAvail(){
 	$('#sg_interval').val(sg_info.delayed==0?"":sg_info.delayed);
 	$('#sg_proxyIP').val(sg_info.proxyIP);
 	var pok=chkIP(sg_info.proxyIP);
-	$('#proxy').attr("class",chkIP(sg_info.proxyIP)?"":"red");
+	$('#proxy').attr("class",(sg_info.proxyIP==""||chkIP(sg_info.proxyIP))?"":"red");
 	$('#sg_button').attr("class",sg_info.run?"stop":(sg_availKW()?"start":""));
 	$('#clear').attr("class",sg_info.run?"disable":"");
 	$('.dis').prop("disabled",sg_info.run);

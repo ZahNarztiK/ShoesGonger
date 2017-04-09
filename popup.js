@@ -200,7 +200,7 @@ $(function(){
 
 	$('#sg_proxyIP').change(function(){ sg_saveProxy($(this).val()); });
 
-	$('#sg_proxyIP').focusout(function(){ $(this).attr("placeHolder","x.x.x.x:port"); });
+	$('#sg_proxyIP').focusout(function(){ $(this).attr("placeHolder","X.X.X.X:PORT"); });
 
 	$('#sg_proxyIP').keyup(function(e){
 		sg_saveProxy($(this).val());

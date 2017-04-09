@@ -66,11 +66,14 @@ section#interval input {
 	text-align: center;
 	width: 52px;
 }
-section#keyword .label, section#interval .label {
+section#proxy input {
+	width: 160px;
+}
+section#keyword .label, section#interval .label, section#proxy .label {
 	height: 31px;
 	line-height: 34px;
 }
-section#keyword .label {
+section#keyword .label, section#proxy .label {
 	margin-right: 7px;
 }
 section#interval .label {
@@ -101,7 +104,7 @@ section#clear #sg_toggleClearList {
 section#option:before {
 	content: 'OPTION';
 }
-section#option {
+section#option, section#proxy {
 	padding: 0 15px;
 	top: 0;
 	left: 160px;
@@ -111,10 +114,10 @@ section#option {
 	background-color: #e0e0e0;
 	transition: background 0.7s;
 }
-section#option:hover {
+section#option:hover, section#proxy:hover {
 	background-color: #d5d5d5;
 }
-section#option .sub-section {
+section#option .sub-section, section#proxy .sub-section {
 	padding: 0;
 	top: 34px;
 	left: 0;
@@ -129,26 +132,39 @@ section#option .sub-section {
 	box-shadow: 0px 4px 8px 0px rgba(0,0,0,0.2);
 	z-index: 9999;
 }
-section#option:hover .sub-section {
+section#option:hover .sub-section, section#proxy:hover .sub-section {
 	padding: 8px 14px;
 	opacity: 1;
 	width: 190px;
 	display: block;
 	height: auto;
 }
-section#option .sub-section .option-list {
+section#option .sub-section .option-list, section#proxy .sub-section .option-list {
 	margin: 2px 0;
 	width: 100%;
 	display: block;
 	position: relative;
 }
-section#option .sub-section .option-list .checkbox {
+section#option .sub-section .option-list .checkbox, section#proxy .sub-section .option-list .checkbox {
 	width: 100%;
 	display: block;
 	position: relative;
 }
 section#option .sub-section .suboption-list {
 	left: 20px;
+}
+section#proxy:before {
+	content: 'PROXY';
+}
+section#proxy {
+	left: 240px;
+}
+section#proxy .sub-section {
+	left: unset;
+	right: 0;
+}
+section#proxy:hover .sub-section {
+	width: 220px;
 }
 
 section#counter {
@@ -191,7 +207,7 @@ section#counter {
 	outline: none;
 }
 
-section#interval .inputborder input {
+section#interval .inputborder input, section#proxy .inputborder input {
 	text-align: center;
 }
 
@@ -247,7 +263,7 @@ section#interval .inputborder input {
 	width: 86px;
 }
 .checkbox label[for=sg_inverse]:before, .checkbox label[for=sg_noredirect]:before,
-.checkbox label[for=sg_focusFin]:before, .checkbox label[for=sg_noti]:before {
+.checkbox label[for=sg_focusFin]:before, .checkbox label[for=sg_noti]:before, .checkbox label[for=sg_proxy]:before {
 	font-size: 0.65em;
 	padding-left: 20px;
 	text-align: left;
@@ -267,6 +283,9 @@ section#interval .inputborder input {
 }
 .checkbox label[for=sg_noti]:before {
 	content: 'DESKTOP NOTIFICATION';
+}
+.checkbox label[for=sg_proxy]:before {
+	content: 'ACTIVATE PROXY';
 }
 .checkbox label.chkOption:before {
 	padding-left: 20px;

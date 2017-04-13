@@ -57,7 +57,7 @@ var proxNone={ mode:"direct" },
 	proxUsed={
 		mode:"fixed_servers",
 		rules:{
-			singleProxy:{ host:"158.69.157.32" },
+			singleProxy:{ host:"" },
 			bypassList:["<local>"]
 		}
 	},
@@ -89,12 +89,11 @@ function chkFinSettings(){
 	}
 	else{
 		console.log("  SV: No Focus");
-		chrome.windows.update(wid,{drawAttention:true},chkNoti);
+		chkNoti(()=>chrome.windows.update(wid,{drawAttention:true}));
 	}
 }
 
-function chkIP(ip)
-{
+function chkIP(ip){
 	var valid=/^\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?\b$/.test(ip);
 	console.log("  SV: IP validation "+(valid?"passed":"failed"));
 	return valid;
@@ -198,8 +197,7 @@ function reloadPageTime(){
 	},sg_info.delayed);
 }
 
-function runProxy(func)
-{
+function runProxy(func){
 	if(!chkIP(sg_info.proxyIP)){
 		stopProxy(func);
 		return;
@@ -243,7 +241,6 @@ function stopSound(sound){
 }
 
 function toggle(){
-	
 	chrome.storage.sync.set({run:(sg_info.run=!sg_info.run)});
 	console.log(sg_info.run?"Start":"Stop");
 	if(sg_info.run){

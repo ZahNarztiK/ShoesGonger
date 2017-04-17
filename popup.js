@@ -172,41 +172,43 @@ $(function(){
 
 	$('#sg_interval,#sg_proxyIP').focus(function(){ $(this).attr("placeHolder",""); });
 
-	$('#sg_interval').focusout(function(){ $(this).attr("placeHolder","0"); });
-
-	$('#sg_interval').keydown(function(e){
-		if	($.inArray(e.keyCode,[46,8,9,27,13,110,190])!==-1 ||
-			(e.keyCode===65&&(e.ctrlKey===true||e.metaKey===true)) ||
-			(e.keyCode>=35&&e.keyCode<=40))
-				return;
-		if((e.shiftKey||(e.keyCode<48||e.keyCode>57))&&(e.keyCode<96||e.keyCode>105)) e.preventDefault();
+	$('#sg_interval').bind({
+		focusout:function(){ $(this).attr("placeHolder","0"); },
+		keydown:function(e){
+			if($.inArray(e.keyCode,[46,8,9,27,13,110,190])!==-1 ||
+				(e.keyCode===65&&(e.ctrlKey===true||e.metaKey===true)) ||
+				(e.keyCode>=35&&e.keyCode<=40))
+					return;
+			if((e.shiftKey||e.keyCode<48||e.keyCode>57)&&(e.keyCode<96||e.keyCode>105)) e.preventDefault();
+		},
+		keyup:function(e){
+			chrome.storage.sync.set({
+				delayed:(sg_info.delayed=((!isNaN($(this).val())&&$(this).val().length>0)?Number($(this).val()):0))
+			});
+			if(e.keyCode==13) sg_toggle();
+		}
 	});
+	//$('#sg_interval').attr("pattern","^\d{0,5}$");
 
-	$('#sg_interval').keyup(function(e){
-		chrome.storage.sync.set({
-			delayed:(sg_info.delayed=((!isNaN($(this).val())&&$(this).val().length>0)?Number($(this).val()):0))
-		});
-		if(e.keyCode==13) sg_toggle();
-	});
-
-	$('#sg_keyword').change(function(){ sg_saveKeyword($(this).val()); });
-
-	$('#sg_keyword').keyup(function(e){
-		sg_saveKeyword($(this).val());
-		if(e.keyCode==13) sg_toggle();
+	$('#sg_keyword').bind({
+		change:function(){ sg_saveKeyword($(this).val()); },
+		keyup:function(e){
+			sg_saveKeyword($(this).val());
+			if(e.keyCode==13) sg_toggle();
+		}
 	});
 
 	$('#sg_proxy').change(function(){ sg_toggleProxy($(this).prop("checked")); });
 
-	$('#sg_proxyIP').change(function(){ sg_saveProxy($(this).val()); });
-
-	$('#sg_proxyIP').focusout(function(){ $(this).attr("placeHolder","X.X.X.X:PORT"); });
-
-	$('#sg_proxyIP').keyup(function(e){
-		sg_saveProxy($(this).val());
-		if(e.keyCode==13&&chkIP(sg_info.proxyIP)){
-			$('#sg_proxy').prop("checked",true);
-			sg_toggleProxy(true);
+	$('#sg_proxyIP').bind({
+		change:function(){ sg_saveProxy($(this).val()); },
+		focusout:function(){ $(this).attr("placeHolder","X.X.X.X:PORT"); },
+		keyup:function(e){
+			sg_saveProxy($(this).val());
+			if(e.keyCode==13&&chkIP(sg_info.proxyIP)){
+				$('#sg_proxy').prop("checked",true);
+				sg_toggleProxy(true);
+			}
 		}
 	});
 

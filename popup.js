@@ -179,16 +179,16 @@ $(function(){
 				(e.keyCode===65&&(e.ctrlKey===true||e.metaKey===true)) ||
 				(e.keyCode>=35&&e.keyCode<=40))
 					return;
-			if((e.shiftKey||e.keyCode<48||e.keyCode>57)&&(e.keyCode<96||e.keyCode>105)) e.preventDefault();
+			if((e.shiftKey||e.keyCode<48||e.keyCode>57)&&(e.keyCode<96||e.keyCode>105)) return false;
 		},
 		keyup:function(e){
 			chrome.storage.sync.set({
 				delayed:(sg_info.delayed=((!isNaN($(this).val())&&$(this).val().length>0)?Number($(this).val()):0))
 			});
 			if(e.keyCode==13) sg_toggle();
-		}
+		},
+		paste:()=>{ return false; }
 	});
-	//$('#sg_interval').attr("pattern","^\d{0,5}$");
 
 	$('#sg_keyword').bind({
 		change:function(){ sg_saveKeyword($(this).val()); },
@@ -227,7 +227,7 @@ $(function(){
 
 	$('#sg_toggleClearList').click(()=>$('#clearList').toggle());
 
-	//$(document).contextmenu(e=>e.preventDefault());
+	//$(document).contextmenu(()=>{ return false; });
 
 	sg_load();
 });

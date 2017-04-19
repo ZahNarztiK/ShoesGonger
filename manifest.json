@@ -13,13 +13,11 @@
 		"512":"icon/icon512.png"
 	},
 
-	"content_scripts": [
-		{
-			"run_at": "document_end",
-			"matches": ["<all_urls>"],
-			"js": ["shgg.js"]
-		}
-	],
+	"content_scripts": [{
+		"run_at": "document_end",
+		"matches": ["<all_urls>"],
+		"js": ["shgg.js"]
+	}],
 
 	"background": {
 		"scripts": ["background.js"],

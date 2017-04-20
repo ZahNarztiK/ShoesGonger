@@ -379,14 +379,12 @@ div#sg_button:after {
 	position: absolute;
 	display: block;
 }
-div#sg_button.start, div#sg_button.stop {
-	box-shadow: inset 0 1px 1px white, 0 1px 3px rgba(0, 0, 0, 0.5);
-}
 div#sg_button.start:after, div#sg_button.stop:after {
 	color: #fff;
 }
 div#sg_button.start, div#sg_button.stop {
 	border-radius: 2px;
+	box-shadow: inset 0 1px 1px white, 0 1px 3px rgba(0, 0, 0, 0.5);
 	transition: all 0.2s ease-out;
 	cursor: pointer;
 }

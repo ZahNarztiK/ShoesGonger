@@ -174,12 +174,12 @@ $(function(){
 
 	$('#sg_interval').bind({
 		focusout:function(){ $(this).attr("placeHolder","0"); },
-		keydown:function(e){
-			if($.inArray(e.keyCode,[46,8,9,27,13,110,190])!==-1 ||
-				(e.keyCode===65&&(e.ctrlKey===true||e.metaKey===true)) ||
+		keydown:e=>{
+			if($.inArray(e.keyCode,[8,9,13,27,46])!=-1 ||
+				((e.ctrlKey==true||e.metaKey==true)&&(e.keyCode==65||e.keyCode==67)) ||
 				(e.keyCode>=35&&e.keyCode<=40))
 					return;
-			if((e.shiftKey||e.keyCode<48||e.keyCode>57)&&(e.keyCode<96||e.keyCode>105)) return false;
+			if((e.keyCode<48||e.keyCode>57)&&(e.keyCode<96||e.keyCode>105)) return false;
 		},
 		keyup:function(e){
 			chrome.storage.sync.set({
@@ -202,7 +202,15 @@ $(function(){
 
 	$('#sg_proxyIP').bind({
 		change:function(){ sg_saveProxy($(this).val()); },
-		focusout:function(){ $(this).attr("placeHolder","X.X.X.X:PORT"); },
+		focusout:function(){ $(this).attr("placeHolder","IPv4:PORT"); },
+		keydown:e=>{
+			if($.inArray(e.keyCode,[8,9,13,27,46,110,190])!=-1 ||
+				((e.ctrlKey==true||e.metaKey==true)&&(e.keyCode==65||e.keyCode==67)) ||
+				(e.shiftKey==true&&e.keyCode==186) ||
+				(e.keyCode>=35&&e.keyCode<=40))
+					return;
+			if((e.keyCode<48||e.keyCode>57)&&(e.keyCode<96||e.keyCode>105)) return false;
+		},
 		keyup:function(e){
 			sg_saveProxy($(this).val());
 			if(e.keyCode==13&&chkIP(sg_info.proxyIP)){

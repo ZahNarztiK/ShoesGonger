@@ -274,7 +274,7 @@ chrome.extension.onConnect.addListener(room=>{
 				room.postMessage("setCounter "+counter);
 				break;
 			case "Proxyosas":
-				sg_info.proxy?stopProxy():loadProxy();
+				(sg_info.proxy=tail)==1?loadProxy():stopProxy();
 				break;
 			case "Toggle":
 				toggle();
@@ -363,4 +363,4 @@ chrome.tabs.onUpdated.addListener((tabId,info,tab)=>{
 });
 
 chrome.storage.sync.set({run:false});
-chrome.storage.sync.get("proxy",status=>status?loadProxy():stopProxy());
+chrome.storage.sync.get("proxy",status=>(sg_info.proxy=status)==?loadProxy():stopProxy());

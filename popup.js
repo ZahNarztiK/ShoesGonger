@@ -114,7 +114,7 @@ function sg_toggle(){ if(sg_info.run||sg_availKW()) sg_toggleRun(); }
 function sg_toggleProxy(status){
 	chrome.storage.sync.set({proxy:(sg_info.proxy=status)},function(){
 		$('#sg_proxyIP').prop("disabled",sg_info.proxy);
-		postCmd("Proxyosas");
+		postCmd("Proxyosas "+(sg_info.proxy?1:0));
 	});
 	
 }

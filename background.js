@@ -363,4 +363,4 @@ chrome.tabs.onUpdated.addListener((tabId,info,tab)=>{
 });
 
 chrome.storage.sync.set({run:false});
-chrome.storage.sync.get("proxy",status=>(sg_info.proxy=status)==?loadProxy():stopProxy());
+chrome.storage.sync.get("proxy",status=>((sg_info.proxy=status)?loadProxy():stopProxy()));

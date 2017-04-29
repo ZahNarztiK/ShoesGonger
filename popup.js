@@ -112,8 +112,11 @@ function sg_setRun(status){
 function sg_toggle(){ if(sg_info.run||sg_availKW()) sg_toggleRun(); }
 
 function sg_toggleProxy(status){
-	$('#sg_proxyIP').prop("disabled",(sg_info.proxy=status));
-	postCmd("Proxyosas");
+	chrome.storage.sync.set({proxy:(sg_info.proxy=status)},function(){
+		$('#sg_proxyIP').prop("disabled",sg_info.proxy);
+		postCmd("Proxyosas");
+	});
+	
 }
 
 function sg_toggleRun(){
@@ -200,7 +203,7 @@ $(function(){
 		}
 	});
 
-	$('#sg_proxy').change(function(){ sg_toggleProxy($(this).prop("checked")); });
+	$('#sg_proxy').change(function(){ sg_toggleProxy($(this).prop("checked")) });
 
 	$('#sg_proxyIP').bind({
 		change:function(){ sg_saveProxy(); },

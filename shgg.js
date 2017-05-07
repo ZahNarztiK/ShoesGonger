@@ -1,14 +1,14 @@
-function sg_inj(sitekey,masterpid,size){
-	var sizecode=460+20*size;
-	var pid=masterpid+'_'+sizecode;
-
+function sg_inj(sitekey,masterpid){
 	var productStatusApi=`http://production.store.adidasgroup.demandware.net/s/adidas-GB/dw/shop/v16_9/products/(${masterpid})?client_id=2904a24b-e4b4-4ef7-89a4-2ebd2d175dde&expand=availability,variations,prices`
 	$.getJSON(productStatusApi,data=>{
 		if(data.count>0){
 			$.get("/on/demandware.store/Sites-adidas-GB-Site/en_GB/Search-GetProductVariations",{pid:masterpid},dt=>{
-				var sel=/<select[.\w\W]*<\/select>/mi.exec(dt).join('').replace(/[\n\t]+/g,'');
-				var isRequiredCaptcha=data.data[0].c_flashProduct;
+				var	sel=/<select[.\w\W]*<\/select>/mi.exec(dt).join('').replace(/[\n\t]+/g,''),
+					isRequiredCaptcha=data.data[0].c_flashProduct,
+					maxQ=data.data[0].c_maxQuantity;
+
 				console.log("isRequiredCaptcha: "+isRequiredCaptcha);
+
 				var sg_code=
 					'<div><form id="addProductForm" name="addProductForm" action="/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct">'+
 						'<input type="hidden" name="layer" value="Add To Bag overlay">'+
@@ -29,7 +29,6 @@ function sg_inj(sitekey,masterpid,size){
 							"$.post('/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct',$('#addProductForm').serialize(),data=>{"+
 								"window.location='/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-Show'"+
 							"}));"+
-
 					"</script>";
 				
 				console.log("sitekey: "+sitekey);

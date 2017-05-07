@@ -21,7 +21,13 @@ function sg_inj(sitekey,masterpid,size){
 						:'')+
 				'</form>'+
 				'<div><button id="sg-button" style="padding: 20px 0; text-align: center; width: 304px;">Add To Bag</button></div></div>'+
-				"<script>$('#sg-button').click(()=>$.post('/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct',$('#addProductForm').serialize()));</script>";
+
+				"<script>"+
+					"$('#sg-button').click(()=>"+
+						"$.post('/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct',$('#addProductForm').serialize(),data=>{"+
+							"window.location='/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-Show'"+
+						"}));"+
+				"</script>";
 			
 			console.log("sitekey: "+sitekey);
 

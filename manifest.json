@@ -3,7 +3,7 @@
 
 	"name": "Shoes Gonger",
 	"description": "Created by NC Production",
-	"version": "0",
+	"version": "2.0",
 	"icons": {
 		"16":"icon/icon16.png",
 		"32":"icon/icon32.png",
@@ -13,24 +13,19 @@
 		"512":"icon/icon512.png"
 	},
 
-	"content_scripts": [{
-		"run_at": "document_end",
-		"matches": ["<all_urls>"],
-		"js": ["shgg.js"]
-	}],
-
 	"background": {
 		"scripts": ["background.js"],
 		"persistent": false
 	},
 
-	"browser_action": {
-		"default_icon": "icon/icon16.png",
-		"default_popup": "popup.html"
+	"page_action": {
+		"default_icon": "icon/icon16.png"
 	},
 
+	//"options_page": "options.html",
+
 	"permissions": [
-		"activeTab", "browsingData", "notifications", "proxy", "storage" , "tabs", "webNavigation", "*://*/*"
+		"activeTab", "declarativeContent", "notifications", "storage" , "tabs", "webNavigation", "*://*/*"
 	],
 
 	"web_accessible_resources": [

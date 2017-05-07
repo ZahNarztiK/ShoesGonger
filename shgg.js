@@ -8,7 +8,7 @@ function sg_inj(sitekey,masterpid,size){
 			var isRequiredCaptcha = data.data[0].c_flashProduct;
 			console.log("isRequiredCaptcha: "+isRequiredCaptcha);
 			var sg_code=
-				'<div><form method="post" name="addProductForm" action="/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct">'+
+				'<div><form id="addProductForm" name="addProductForm" action="/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct">'+
 					'<input type="hidden" name="layer" value="Add To Bag overlay">'+
 					`<input type="hidden" name="pid" value="${pid}">`+
 					'<input type="hidden" name="Quantity" value="1">'+
@@ -23,8 +23,10 @@ function sg_inj(sitekey,masterpid,size){
 						sg_code += '<script src="https://www.google.com/recaptcha/api.js"></script>'+
 						`<div class="g-recaptcha" data-theme="dark" data-sitekey="${sitekey}"></div>`
 					}
-			sg_code += '<div><button type="button" name="add-to-cart-button" style="padding: 20px 0; text-align: center; width: 304px;">Add To Bag</button></div>'+
-				'</form></div>';
+			sg_code += ''+//'<div><button type="button" name="add-to-cart-button" style="padding: 20px 0; text-align: center; width: 304px;">Add To Bag</button></div>'+
+				'</form>'+
+				'<div><button id="sg-button" style="padding: 20px 0; text-align: center; width: 304px;">Add To Bag</button></div></div>'+
+				"<script>$('#sg-button').click(()=>$.post('/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct',$('#addProductForm').serialize()));</script>";
 
 			var sg_css = {
 				"margin-top":"100px",

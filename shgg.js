@@ -32,7 +32,7 @@ function sg_inj(sitekey,masterpid){
 function getSg_code(sitekey,masterpid,data,data1) {
 	data=data.data[0];
 	var sel=/<select[.\w\W]*<\/select>/mi.exec(data1).join('').replace(/[\n\t]+/g,'');
-	var c_imagesPLP=data.c_imagesPLP;
+	var c_imagesPLP=data.c_imagesPLP[0];
 	var isRequiredCaptcha=data.c_flashProduct;
 	var c_division=data.c_division;
 	var name=data.name;

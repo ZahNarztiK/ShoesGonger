@@ -69,7 +69,7 @@ chrome.extension.onConnect.addListener(room=>{
 */
 chrome.pageAction.onClicked.addListener(tab=>{
 	var	sitekey='6Lf3NxoUAAAAAFdi90UqD0TaZSHCgINayoZnM69F',
-		masterpid='BB2951'
+		masterpid='BB6373'
 
 	chrome.tabs.executeScript(tab.id,{file:"jquery-1.7.2.js"},()=>
 		chrome.tabs.executeScript(tab.id,{file:"shgg.js"},()=>

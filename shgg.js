@@ -1,19 +1,14 @@
-function sg_inj(sitekey,masterpid,size){
-	var sizecode=460+20*size;
-	var pid=masterpid+'_'+sizecode;
-
+function sg_inj(sitekey,masterpid){
 	var productStatusApi=`http://production.store.adidasgroup.demandware.net/s/adidas-GB/dw/shop/v16_9/products/(${masterpid})?client_id=2904a24b-e4b4-4ef7-89a4-2ebd2d175dde&expand=availability,variations,prices`
 	$.getJSON(productStatusApi,data=>{
 		if(data.count>0){
 			$.get("/on/demandware.store/Sites-adidas-GB-Site/en_GB/Search-GetProductVariations",{pid:masterpid},data1=>{
-				
 				var sg_code=getSg_code(sitekey, masterpid, data, data1)+
 					"<script>"+
 						"$('#sg-button').click(()=>"+
 							"$.post('/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct',$('#addProductForm').serialize(),data=>{"+
 								"window.location='/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-Show'"+
 							"}));"+
-
 					"</script>";
 				
 				var sg_css = {
@@ -33,17 +28,18 @@ function sg_inj(sitekey,masterpid,size){
 }
 
 function getSg_code(sitekey,masterpid,data,data1) {
-	data = data.data[0];
+	data=data.data[0];
 	var sel=/<select[.\w\W]*<\/select>/mi.exec(data1).join('').replace(/[\n\t]+/g,'');
-	var c_imagesPLP = data.c_imagesPLP;
-	var isRequiredCaptcha = data.c_flashProduct;
-	var c_division = data.c_division;
-	var name = data.name;
-	var price = data.c_displayPrice;
-	var isExcludedPromo = data.c_pdpCallout=="pdp-promo-nodiscount";
-	var c_color = data.c_color;
+	var c_imagesPLP=data.c_imagesPLP;
+	var isRequiredCaptcha=data.c_flashProduct;
+	var c_division=data.c_division;
+	var name=data.name;
+	var price=data.c_displayPrice;
+	var isExcludedPromo=data.c_pdpCallout=="pdp-promo-nodiscount";
+	var c_color=data.c_color;
+	var c_maxQuantity=data.c_maxQuantity;
 
-	var sg_code = ''+
+	var sg_code=
 	`<div id="productInfo" class="container">`+
 	`	<div class="col-8">`+
 	`		<div class="main-image">`+

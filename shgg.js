@@ -1,3 +1,4 @@
+addCSS();
 function sg_inj(sitekey,masterpid){
 	var productStatusApi=`http://production.store.adidasgroup.demandware.net/s/adidas-GB/dw/shop/v16_9/products/(${masterpid})?client_id=2904a24b-e4b4-4ef7-89a4-2ebd2d175dde&expand=availability,variations,prices`
 	$.getJSON(productStatusApi,data=>{
@@ -21,6 +22,7 @@ function sg_inj(sitekey,masterpid){
 				$("body>*,#container>*,.QSISlider").css("display","none");
 				$("#container.header-sticky-wrapper").css("display","block");
 				$("#container").css(sg_css);
+				$("#container").addClass("pt_productdetails");
 				$("#container").prepend(sg_code);
 			});
 		}
@@ -105,4 +107,13 @@ function getSg_code(sitekey,masterpid,data,data1) {
 	`	</div>`+
 	`</div>`;
 	return sg_code;
+}
+
+function addCSS() {
+	var product = "http://demandware.edgesuite.net/aagl_prd/on/demandware.static/Sites-adidas-GB-Site/-/en_GB/v1494126478433/css/adidas-build-product.css";
+	$("<link/>", {
+	   rel: "stylesheet",
+	   type: "text/css",
+	   href: product
+	}).appendTo("head");
 }

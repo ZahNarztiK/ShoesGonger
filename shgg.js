@@ -2,10 +2,10 @@ function sg_inj(sitekey,masterpid,size){
 	var sizecode=460+20*size;
 	var pid=masterpid+'_'+sizecode;
 
-	var productStatus = `http://production.store.adidasgroup.demandware.net/s/adidas-GB/dw/shop/v16_9/products/(${masterpid})?client_id=2904a24b-e4b4-4ef7-89a4-2ebd2d175dde&expand=availability,variations,prices`
-	$.getJSON( productStatus, function( data ) {
-		if(data.count > 0) {
-			var isRequiredCaptcha = data.data[0].c_flashProduct;
+	var productStatusApi=`http://production.store.adidasgroup.demandware.net/s/adidas-GB/dw/shop/v16_9/products/(${masterpid})?client_id=2904a24b-e4b4-4ef7-89a4-2ebd2d175dde&expand=availability,variations,prices`
+	$.getJSON(productStatusApi,data=>{
+		if(data.count>0){
+			var isRequiredCaptcha=data.data[0].c_flashProduct;
 			console.log("isRequiredCaptcha: "+isRequiredCaptcha);
 			var sg_code=
 				'<div><form id="addProductForm" name="addProductForm" action="/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct">'+
@@ -14,19 +14,16 @@ function sg_inj(sitekey,masterpid,size){
 					'<input type="hidden" name="Quantity" value="1">'+
 					`<input type="hidden" name="masterPid" value="${masterpid}">`+
 					'<input type="hidden" name="sessionSelectedStoreID" value="null">'+
-					'<input type="hidden" name="ajax" value="true">'
-					if(isRequiredCaptcha) {
-						if(data.data[0].c_reCaptchaKeys != null) {
-							sitekey = JSON.parse(data.data[0].c_reCaptchaKeys).publicKey
-						}
-						console.log("sitekey: "+sitekey);
-						sg_code += '<script src="https://www.google.com/recaptcha/api.js"></script>'+
-						`<div class="g-recaptcha" data-theme="dark" data-sitekey="${sitekey}"></div>`
-					}
-			sg_code += ''+//'<div><button type="button" name="add-to-cart-button" style="padding: 20px 0; text-align: center; width: 304px;">Add To Bag</button></div>'+
+					'<input type="hidden" name="ajax" value="true">'+
+					(isRequiredCaptcha?
+						'<script src="https://www.google.com/recaptcha/api.js"></script>'+
+						`<div class="g-recaptcha" data-theme="dark" data-sitekey="${sitekey=(data.data[0].c_reCaptchaKeys!=null?JSON.parse(data.data[0].c_reCaptchaKeys).publicKey:sitekey)}"></div>`
+						:'')+
 				'</form>'+
 				'<div><button id="sg-button" style="padding: 20px 0; text-align: center; width: 304px;">Add To Bag</button></div></div>'+
 				"<script>$('#sg-button').click(()=>$.post('/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct',$('#addProductForm').serialize()));</script>";
+			
+			console.log("sitekey: "+sitekey);
 
 			var sg_css = {
 				"margin-top":"100px",

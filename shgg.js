@@ -8,7 +8,7 @@ function sg_inj(sitekey,masterpid){
 					"<script>"+
 						"$('#sg-button').click(()=>"+
 							"$.post('/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-MiniAddProduct',$('#addProductForm').serialize(),data=>{"+
-								"window.location='/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-Show'"+
+								"window.location='https://www.adidas.co.uk/on/demandware.store/Sites-adidas-GB-Site/en_GB/Cart-Show'"+
 							"}));"+
 					"</script>";
 				
